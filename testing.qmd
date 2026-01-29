@@ -1,0 +1,58 @@
+---
+title: "testing_document"
+format: html
+editor: visual
+---
+
+```{r}
+library(ggplot2)
+library(svglite)
+library(r2d3)
+library(tibble)
+library(jsonlite)
+
+```
+
+```{r}
+data = tibble(x = seq(1, 25, .5), 
+              y = exp((x-15)/30),
+              ypoints = exp(((x-15)/30) + rnorm(30, 0, 0.1)))
+data$Group <- sample(c("Group_1", "Group_2", "Group_3"),
+                     size = nrow(data),
+                     replace = TRUE)
+```
+```{r}
+ggplot(data, aes(x, ypoints)) +
+  geom_point(size = 2, colour = "magenta") +
+  labs(x = "X-Label", y = "Y-Label")
+```
+
+```{r}
+(ggplot(data, aes(x, ypoints)) +
+  geom_point(size = 2, colour = "magenta") +
+  labs(x = "X-Label", y = "Y-Label")) |> 
+  youdrawit_scatter()
+```
+```{r}
+ui <- fluidPage(
+  (ggplot(data, aes(x, ypoints)) +
+  geom_point(size = 5, colour = "blue", alpha = 0.7) +
+  labs(x = "X-Label", y = "Hello") +
+  theme(legend.position = "none")) |> 
+  youdrawit_scatter()
+)
+
+server <- function(input, output, session) {
+
+  observeEvent(input$my_shiny_app, {
+    cat("Received from JS:\n")
+    str(input$my_shiny_app)
+  })
+
+}
+# Can we now take that shiny app and save it as an R object you can take from a Java to a tibble
+# In the example shiny app just to show that it is, render a table 
+# Might need to include stuff in the documentation
+shinyApp(ui, server)
+```
+
