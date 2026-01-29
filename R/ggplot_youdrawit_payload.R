@@ -2,7 +2,6 @@
 #'
 #' @param p A ggplot2 graph
 #' @importFrom ggplot2 ggplot_build
-#' @export
 #' @return A dataframe containing information needed to render a ggplot into D3 through youdrawit functions
 #' @examples
 #' library(ggplot2)
@@ -12,6 +11,7 @@
 #'           labs(x = "Weight", y = "MPG")
 #'
 #' ggplot_youdrawit_payload(p)
+#' @export
 
 ggplot_youdrawit_payload <- function(p) {
   stopifnot(inherits(p, "ggplot"))

@@ -4,7 +4,13 @@
 \alias{youdrawit_scatter}
 \title{Render a ggplot scatterplot as D3 via r2d3}
 \usage{
-youdrawit_scatter(p, ..., width = NULL, height = NULL)
+youdrawit_scatter(
+  p,
+  ...,
+  width = NULL,
+  height = NULL,
+  shiny_message_loc = NULL
+)
 }
 \arguments{
 \item{p}{A ggplot2 graph}
@@ -14,6 +20,8 @@ youdrawit_scatter(p, ..., width = NULL, height = NULL)
 \item{width}{The width of the desired D3 graph}
 
 \item{height}{The height of the desired D3 graph}
+
+\item{shiny_message_loc}{The location of your shiny message}
 }
 \value{
 An r2d3 htmlwidget rendering the scatterplot
