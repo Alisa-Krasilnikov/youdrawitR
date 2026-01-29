@@ -1,5 +1,17 @@
-#' Take in a ggplot2 graph and extract data for rerendering
+#' Take in a ggplot2 graph and extract data for rerendering in D3
+#'
+#' @param p A ggplot2 graph
+#' @importFrom ggplot2 ggplot_build
 #' @export
+#' @return A dataframe containing information needed to render a ggplot into D3 through youdrawit functions
+#' @examples
+#' library(ggplot2)
+#'
+#' p <- ggplot(mtcars, aes(x = wt, y = mpg)) +
+#'           geom_point(size = 2, colour = "magenta") +
+#'           labs(x = "Weight", y = "MPG")
+#'
+#' ggplot_youdrawit_payload(p)
 
 ggplot_youdrawit_payload <- function(p) {
   stopifnot(inherits(p, "ggplot"))
@@ -8,7 +20,7 @@ ggplot_youdrawit_payload <- function(p) {
   geom_name <- class(p$layers[[1]]$geom)[1]
   if (!grepl("GeomPoint", geom_name)) stop("Only geom_point() supported for now.")
 
-  b <- ggplot2::ggplot_build(p)
+  b <- ggplot_build(p)
 
   # trained scales
   x_scale <- b$layout$panel_scales_x[[1]]
