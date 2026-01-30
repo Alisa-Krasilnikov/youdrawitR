@@ -1,0 +1,37 @@
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+# youdrawitR
+
+<!-- badges: start -->
+
+[![R-CMD-check](https://github.com/Alisa-Krasilnikov/youdrawitR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Alisa-Krasilnikov/youdrawitR/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
+
+## Overview
+
+‘You Draw It’ is a feature that allows users to interact with a chart
+directly by drawing a line on their computer screen with a mouse.
+Originally introduced by the New York Times in 2015 for the purpose of
+interactive reading, this package adapts the use of the ‘You Draw It’
+method as a tool for interactive testing of graphics.
+
+## Installation
+
+You can install the development version of youdrawitR from
+[GitHub](https://github.com/) with:
+
+``` r
+# install.packages("pak")
+pak::pak("Alisa-Krasilnikov/youdrawitR")
+```
+
+## Usage
+
+First, load the youdrawitR package
+
+``` r
+library(youdrawitR)
+```
+
+Continue the rest once Alisa finishes it :)
