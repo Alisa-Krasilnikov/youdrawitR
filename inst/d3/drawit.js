@@ -63,10 +63,10 @@
   }
 
   // Also Dillon's code, used to prevent "jumping" between gaps
-  // Could be replaced by a dense grid?
+  // Could be replaced by a dense grid? (no, needed for the data to input connection)
   function interpolate_x({x_range, threshold_size, simplified_points}) {
     // Set threshold distance as % of the x-range
-    const threshold_distance = x_range * threshold_size;
+    const threshold_distance = x_range * threshold_size; // Might benefit from being user-adj
     // interpolate x value (adds drawble_points between extreme x values so the line does not jump)
     const drawable_points = [];
 
@@ -79,7 +79,7 @@
       // the threshold value then we need to add interpolated points between them.
       if (i + 1 < simplified_points.length) {
         const next = simplified_points[i + 1];
-        if (Math.abs(next.x - d.x) > threshold_distance) {
+        if (Math.abs(next.x - d.x) > threshold_distance) { // Smaller threshold_distance means more interpolated points
           const interpolated_x = d3.range(d.x + threshold_distance, next.x, threshold_distance);
 
           interpolated_x.forEach(x => drawable_points.push({x, y: null}));
@@ -114,7 +114,7 @@
   }
 
   // create a spacing threshold that adjusts to average gaps in data
-  // Maybe not necessary?
+  // Maybe not necessary? (I think it's good as default, could use stuff from user)
   function get_dynamic_threshold(drawable_points, fraction = 0.1) {
     if(drawable_points.length < 2) return 0.01; // fallback for tiny datasets
     const diffs = [];
@@ -136,6 +136,7 @@
     const draw_start = state.draw_start;
     const x_range = state.x_range;
 
+
     if (!line_data.length) return [];
 
     // Add endpoints if outside x_range
@@ -148,9 +149,20 @@
     let simplified = simplify_data({ line_data, x_range: total_x_range, threshold_percentage: 0.05 });
     let drawable_points = interpolate_x({ x_range: total_x_range, threshold_size: 0.05, simplified_points: simplified });
 
+
+    // Ensure all original xs are included (Needed for data to input connection)
+    const all_x = line_data.map(d => d.x);
+    all_x.forEach(xVal => {
+      if (!drawable_points.some(d => d.x === xVal)) {
+        drawable_points.push({ x: xVal, y: null });
+        }
+    });
+
     // Remove repeated x values
-    const threshold = get_dynamic_threshold(drawable_points, 0.1);
-    drawable_points = drawable_points.filter((d, i, arr) => i === 0 || Math.abs(d.x - arr[i - 1].x) > threshold);
+    //const threshold = get_dynamic_threshold(drawable_points, 0.1);
+    //drawable_points = drawable_points.filter((d, i, arr) => i === 0 || Math.abs(d.x - arr[i - 1].x) > threshold);
+
+    drawable_points.sort((a, b) => a.x - b.x);
 
     if (free_draw) {
       return drawable_points.map(d => ({ x: d.x, y: null }));

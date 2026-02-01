@@ -24,6 +24,11 @@
 #'   youdrawit_scatter()
 #' @export
 
+#Testing:
+  # - See if works with negative data
+  # - See if x-axis dipping is an issue
+  # - Guidebox toggle options
+
 youdrawit_scatter <- function(p, ..., width = NULL, height = NULL,
                               shiny_message_loc = NULL) {
   if (!inherits(p, "ggplot")) {
@@ -37,7 +42,7 @@ youdrawit_scatter <- function(p, ..., width = NULL, height = NULL,
   payload <- ggplot_youdrawit_payload(p)
   options = list(shiny_message_loc = shiny_message_loc)
 
-  widget <- r2d3(
+  youdrawit_plot <- r2d3(
     data = payload,
     script = system.file("d3/scatter.js", package = "youdrawitR"),
     dependencies = system.file("d3/drawit.js", package = "youdrawitR"),
@@ -61,15 +66,15 @@ youdrawit_scatter <- function(p, ..., width = NULL, height = NULL,
      msg <- domain$input[[shiny_message_loc]]
      shiny::req(msg)
 
-     tibble::tibble(
-       x = msg$x,
-       y = msg$y
+     tibble::tibble( # Make sure to flatten the values
+       x = unlist(msg$x, use.names = FALSE),
+       y = unlist(msg$y, use.names = FALSE)
      )
    })
 
-   return(list(widget = widget, points = tibble_reactive))
+   return(list(youdrawit_plot = youdrawit_plot, points = tibble_reactive))
  }
 
- return(widget)
+ return(youdrawit_plot)
 }
 
