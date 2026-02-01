@@ -14,6 +14,9 @@ BugReports: https://github.com/Alisa-Krasilnikov/youdrawitR/issues
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Imports:
-    r2d3
+    r2d3,
+    rlang,
+    shiny,
+    tibble
 Depends:
     ggplot2
