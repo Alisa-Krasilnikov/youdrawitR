@@ -1,9 +1,30 @@
 (function () {
-  // Make sure the data is row oriented
-  // Return an empty array if not
+  // Key changes made due to the addition of multiple layers:
+    // rowsFrom converts the data into row-oriented here; previously done by scatter.js
+      // This is because we have to match multiLayer.js
+    // Our gapping strategy is different as a consequence, also updated to be more data-driven
+      // Previously relied heavily on Dillon's code, now restructured
+
   function rowsFrom(input) {
-    return Array.isArray(input) ? input : [];
+    if (Array.isArray(input)) return input;
+
+    if (input && typeof input === "object") {
+    const cols = Object.keys(input);
+    if (!cols.length) return [];
+
+    const n = Array.isArray(input[cols[0]]) ? input[cols[0]].length : 0;
+
+    return d3.range(n).map(i => {
+      const row = {};
+      cols.forEach(k => {
+        row[k] = Array.isArray(input[k]) ? input[k][i] : input[k];
+      });
+      return row;
+    });
+    }
+    return [];
   }
+
   // Attach drawit state to the SVG DOM node
   // This allows multiple calls without reinitializing everything
   function ensureState(svg) {
@@ -14,6 +35,11 @@
     root.__drawit__ = root.__drawit__ || {};
     return root.__drawit__;
   }
+
+  // helper to capitalize first letter (used later)
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
 
   // Get status on whether line is done or not based on how much is filled in
   // Only really care if it's done or not, used later
@@ -28,66 +54,55 @@
     return "in_progress";
   }
 
-  // Uses Dillon's code to simplify the data
-  function simplify_data({line_data, x_range, threshold_percentage}) {
-    // simplify the drawable_points by binning the points based on a certain threshold_percentage
-    // only allow 3 points per bin (when too many points in a cluster drawing line takes a while and
-    // if a large cluster can sometime be impossible to draw)
-    const bin_size = x_range * threshold_percentage;
-    const simplified_points = [];
-    let current_bin = [];
+  // Based on Dillon's code, redone, used to prevent "jumping" between gaps
+  // Could be replaced by a dense grid? (no, needed for the data to input connection)
+  function interpolate_gaps(line_data, maxGap) {
+    // If there is no data, return empty array early
+    if (!line_data.length) return [];
 
-    for (let i = 0; i < line_data.length; i++) {
-      current_bin.push(line_data[i]);
+    // Make a copy of the data and sort it from smallest x to largest x
+    // We copy it so we don't change the original data by accident (learned the hard way)
+    const sorted = line_data.slice().sort((a, b) => a.x - b.x);
 
+    // This will store our final interpolated result
+    const result = [];
 
-      const next_x = line_data[i + 1]?.x;
-      if (!next_x || next_x - current_bin[0].x > bin_size) {
+    // Loop through each adjacent pair of points
+    for (let i = 0; i < sorted.length - 1; i++) {
+      const p1 = sorted[i]; // current point
+      const p2 = sorted[i + 1]; // next point
 
-        // if there are more than 3 points in bin add the first, middle, and last point to drawable_points
-        if (current_bin.length > 3) {
-          simplified_points.push(
-            current_bin[0],
-            current_bin[Math.floor(current_bin.length / 2)],
-            current_bin[current_bin.length - 1]
-            // else add all points in current bin to drawable_points
-          );
-        } else {
-          simplified_points.push(...current_bin);
-        }
-        // reset current bin to empty
-        current_bin = [];
+      // Always keep the current original point
+      result.push(p1);
+
+      // Find the distance between the two x-values
+      const gap = p2.x - p1.x;
+
+      // Figure out how many smaller sections we need
+      // This makes sure no section is bigger than maxGap
+      if (gap > maxGap) {
+        const steps = Math.ceil(gap / maxGap);
+
+        // Insert intermediate points between p1 and p2
+        for (let s = 1; s < steps; s++) {
+          // t tells us how far between p1 and p2 we are (from 0 to 1) (normalized)
+          const t = s / steps;
+
+          // Add interpolated point at proportional x position
+          // y is intentionally set to null bc this is a drawable point
+          result.push({
+            x: p1.x + t * gap,
+            y: null   // keep null so user fills it
+        });
       }
     }
-    return simplified_points;
   }
 
-  // Also Dillon's code, used to prevent "jumping" between gaps
-  // Could be replaced by a dense grid? (no, needed for the data to input connection)
-  function interpolate_x({x_range, threshold_size, simplified_points}) {
-    // Set threshold distance as % of the x-range
-    const threshold_distance = x_range * threshold_size; // Might benefit from being user-adj
-    // interpolate x value (adds drawble_points between extreme x values so the line does not jump)
-    const drawable_points = [];
+  // Push the final original point
+  // (Because loop stops before last element)
+  result.push(sorted[sorted.length - 1]);
 
-
-    for (let i = 0; i < simplified_points.length; i++) {
-      const d = simplified_points[i];
-      drawable_points.push(d);
-
-      // If there is another point after this one and their X-distance is larger than
-      // the threshold value then we need to add interpolated points between them.
-      if (i + 1 < simplified_points.length) {
-        const next = simplified_points[i + 1];
-        if (Math.abs(next.x - d.x) > threshold_distance) { // Smaller threshold_distance means more interpolated points
-          const interpolated_x = d3.range(d.x + threshold_distance, next.x, threshold_distance);
-
-          interpolated_x.forEach(x => drawable_points.push({x, y: null}));
-        }
-      }
-    }
-    // remove repeated x values from drawable_points
-    return drawable_points;
+  return result;
 
   }
 
@@ -113,64 +128,55 @@
     return median_diff;
   }
 
-  // create a spacing threshold that adjusts to average gaps in data
-  // Maybe not necessary? (I think it's good as default, could use stuff from user)
-  function get_dynamic_threshold(drawable_points, fraction = 0.1) {
-    if(drawable_points.length < 2) return 0.01; // fallback for tiny datasets
-    const diffs = [];
-
-    for(let i=1; i<drawable_points.length; i++){
-      diffs.push(drawable_points[i].x - drawable_points[i-1].x);
-    }
-    diffs.sort((a,b)=>a-b);
-
-    const mid = Math.floor(diffs.length/2);
-    const median_diff = diffs.length % 2 === 0 ? (diffs[mid-1] + diffs[mid])/2 : diffs[mid];
-    return median_diff * fraction;  // scale fraction of median spacing
-    }
-
   // This has been redone based on Dillon's adjustments (prevent gapping)
+  // Note: Redone again due to the new interpolation stuff
+  // This basically combines everything so we get the point-based drawable grid
   function setup_drawable_points(state) {
-    let line_data = state.line_data ? [...state.line_data] : [];
-    const free_draw = state.free_draw;
-    const draw_start = state.draw_start;
-    const x_range = state.x_range;
+    const raw = state.line_data || [];
+    if (!raw.length) return [];
 
+    // Make a copy and sort from smallest x to largest x
+      // Sorting may be redundant but I'd rather oversort and waste computation
+    // copy so we don’t change the original data
+    const sorted = raw.slice().sort((a, b) => a.x - b.x);
 
-    if (!line_data.length) return [];
-
-    // Add endpoints if outside x_range
-    if (x_range && x_range[0] < line_data[0].x) line_data.unshift({ x: x_range[0], y: null });
-    if (x_range && x_range[1] > line_data[line_data.length - 1].x) line_data.push({ x: x_range[1], y: null });
-
-    // Get range of x values from first and last point
-    const total_x_range = line_data[line_data.length - 1].x - line_data[0].x || 1;
-
-    let simplified = simplify_data({ line_data, x_range: total_x_range, threshold_percentage: 0.05 });
-    let drawable_points = interpolate_x({ x_range: total_x_range, threshold_size: 0.05, simplified_points: simplified });
-
-
-    // Ensure all original xs are included (Needed for data to input connection)
-    const all_x = line_data.map(d => d.x);
-    all_x.forEach(xVal => {
-      if (!drawable_points.some(d => d.x === xVal)) {
-        drawable_points.push({ x: xVal, y: null });
-        }
-    });
-
-    // Remove repeated x values
-    //const threshold = get_dynamic_threshold(drawable_points, 0.1);
-    //drawable_points = drawable_points.filter((d, i, arr) => i === 0 || Math.abs(d.x - arr[i - 1].x) > threshold);
-
-    drawable_points.sort((a, b) => a.x - b.x);
-
-    if (free_draw) {
-      return drawable_points.map(d => ({ x: d.x, y: null }));
-
-    } else {
-      return drawable_points.map((d, i) => ({ x: d.x, y: i === 0 ? d.y : null }));
-
+    // Find the spacing between each pair of neighboring points
+    const gaps = [];
+    for (let i = 1; i < sorted.length; i++) {
+      gaps.push(sorted[i].x - sorted[i - 1].x);
     }
+
+    // Find the middle gap (median... because outliers)
+    // This helps us understand the "normal" spacing of the data
+    const medianGap = gaps.sort((a,b)=>a-b)[Math.floor(gaps.length/2)];
+
+    // Allow gaps up to twice the normal spacing
+    // Bigger gaps will be filled in
+    const maxGap = medianGap * 2;
+
+    // Fill in large gaps with extra points, see interpolate_gaps function
+    let interpolated = interpolate_gaps(sorted, maxGap);
+
+    // Remove any points that are too close together
+    // Google scared me about floating-point issues, so EPS is a very tiny number to avoid them
+    const EPS = 1e-9;
+    interpolated = interpolated.filter((d, i, arr) =>
+      i === 0 || (d.x - arr[i - 1].x) > EPS
+    );
+
+    // If free_draw mode is on every point starts with y = null meaning the user must draw everything
+    if (state.free_draw) {
+      return interpolated.map(d => ({ x: d.x, y: null }));
+    }
+
+    // Otherwise if pin_start is true, keep the first point’s original y-value
+    // All other points start as null and must be drawn by the user
+    // NOT YET TESTED!!!!!!
+    return interpolated.map((d, i) => ({
+      x: d.x,
+      y: i === 0 && state.pin_start ? sorted[0].y : null // this makes pinning "optional"
+      // The logic is roughly the same, this just makes more intuitive sense
+    }));
   }
 
   function fill_in_closest_point(state, drag_x, drag_y) {
@@ -256,21 +262,29 @@
 
 // Interaction ------------------------------
   function attach_drag(state) {
-    // Rewritten for simplicity
-    state.plot.overlay.call(
-      d3.drag()
-        .on("drag", function (event) {
-          const [mx, my] = d3.pointer(event, state.plot.g.node());
-          const drag_x = state.plot.x.invert(mx);
-          const drag_y = state.plot.y.invert(my);
 
-          fill_in_closest_point(state, drag_x, drag_y);
-          draw_user_line(state);
-          draw_rectangle(state);
-        })
-        .on("end", function () { on_end(state); })
-    );
-  }
+  const overlay = state.plot.overlay;
+
+  // Clear any previous drag listeners
+  overlay.on(".drag", null);
+
+  overlay.call(
+    d3.drag()
+      .on("start drag", function (event) {
+
+        const [mx, my] = d3.pointer(event, state.plot.g.node());
+        const drag_x = state.plot.x.invert(mx);
+        const drag_y = state.plot.y.invert(my);
+
+        fill_in_closest_point(state, drag_x, drag_y);
+        draw_user_line(state);
+        draw_rectangle(state);
+      })
+      .on("end", function () {
+        on_end(state);
+      })
+  );
+}
 
   // "on end" behavior, basically whether we send to Shiny
   function on_end(state) {
@@ -280,18 +294,40 @@
     if (state._sent_done) return;
     state._sent_done = true;
 
+    // Render delayed layers dynamically
+    // After the user finishes drawing, show any layers that were supposed to appear at the end
+    if (state.delayed_layers) {
+      // Go through each layer that was saved earlier (refer to multiLayer.js)
+      state.delayed_layers.forEach(layer => {
+        const rendererName = "render" + capitalize(layer.geom_type) + "Layer";
+
+        // Look up that function on the global window object
+        const renderer = window[rendererName];
+
+        // If the function exists, call it to draw the layer
+        if (typeof renderer === "function") {
+          renderer(state.plot.svg, state.plot, layer);
+        }
+      });
+      // Clear the list so we don’t render them again
+      state.delayed_layers = [];
+    }
+
     if (state.shiny_message_loc) {
       if (typeof Shiny !== "undefined") {
-        Shiny.setInputValue(
-          state.shiny_message_loc,
-          {
-            x: state.drawable_points.map(d => d.x),
-            y: state.drawable_points.map(d => d.y)
-          },
-          { priority: "event" }
-        );
-        alert("Sending message to " + state.shiny_message_loc); // Send an alert to where it's being sent
-        // Maybe not necessary? Good for testing
+        setTimeout(() => {
+          Shiny.setInputValue(
+            state.shiny_message_loc,
+            {
+              x: state.drawable_points.map(d => d.x),
+              y: state.drawable_points.map(d => d.y)
+            },
+            { priority: "event" }
+            );
+
+          alert("Sending message to " + state.shiny_message_loc); // Send an alert to where it's being sent
+          // Maybe not necessary? Good for testing
+        }, 50);  // short delay so delayed layers can render
       }
     }
   }
@@ -314,7 +350,6 @@
 
     state.plot = plot;
     state.line_data = rowsFrom(data); // Adjusted because of the gapping issue
-
     options = options || {};
     state.free_draw = !!options.free_draw;
     state.pin_start = !!options.pin_start;
