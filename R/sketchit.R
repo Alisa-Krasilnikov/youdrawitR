@@ -29,7 +29,7 @@
 #' @export
 sketchit <- function(p, ..., width = NULL, height = NULL,
                    shiny_message_loc = NULL, color_options = TRUE,
-                   starting_color = "steelblue",
+                   starting_color = NULL,
                    palette = NULL, stroke_width = 2){
   payload <- ggplot_youdrawit_payload(p)
 

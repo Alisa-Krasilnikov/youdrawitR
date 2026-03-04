@@ -30,7 +30,6 @@
     state.currentData = [];
     state.isDrawing = true;  // initially allow drawing
     state.isDone = false;    // flag for "Done"
-    state.currentColor = options.starting_color || "steelblue";
     state.strokeWidth = options.stroke_width || 2;
     // These are for the Shiny implementation
     state.completedLines = [];
@@ -212,10 +211,10 @@
 
         let palette = (options.palette && options.palette.length > 0)
         ? [...options.palette] // start with user-given palette
-        : ["orange", "green", "red", "purple"]; // switch to default if needed
+        : ["steelblue", "orange", "green", "red", "purple"]; // switch to default if needed
 
-        // Add starting_color if given and not already in the palette
-        const starting = options.starting_color || "steelblue";
+        // Add starting_color if given, or take the first from palette
+        const starting = options.starting_color ?? palette[0];
 
         // Add the starting color to the pallet if it's not there yet
         if (!palette.includes(starting)) {
@@ -224,6 +223,9 @@
 
         // Ensure only unique colors
         palette = Array.from(new Set(palette)); // This is just a js trick I found. It's essentially just unique()
+
+        // Set drawing color
+        state.currentColor = starting;
 
         // Layout variables
         const squareSize = 12;
@@ -236,19 +238,30 @@
           const row = Math.floor(i / colorsPerRow);
 
           buttonGroup.append("rect")
+            .attr("class", "color-button")
             .attr("x", width - 70 + col * (squareSize + spacing))
             .attr("y", margin + 105 + row * (squareSize + spacing))
             .attr("width", squareSize)
             .attr("height", squareSize)
             .style("fill", c)
             .style("stroke", "#666")
-            .style("stroke-width", 1)
+            .style("stroke-width", c === state.currentColor ? 2 : 1) // bold first color button to indicate selection
             .style("cursor", "pointer")
-            .on("click", () => {
+            .on("click", function() {
               state.currentColor = c; // set color based on click of color button
+
+              state.buttonGroup.selectAll(".color-button")
+                .style("stroke-width", 1); // reset
+
+              d3.select(this)
+                .style("stroke-width", 2); // bold clicked
             });
 
         });
+      }
+      // Starting color if no color option palette
+      else {
+        state.currentColor = options.starting_color ?? "steelblue";
       }
 
       state.buttonGroup = buttonGroup; // I don't remember why I have this
