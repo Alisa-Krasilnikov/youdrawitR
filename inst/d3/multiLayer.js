@@ -76,23 +76,14 @@ svg.node().__plot__ = plot;
 
 // -------------------------------
 
-// Attach drawit first
-if (window.youdrawitAttachDrawit && data.layers?.length) {
-  window.youdrawitAttachDrawit(
-    svg,
-    width,
-    height,
-    data.layers[0].data,  // first layer is the drawable one
-    options
-  );
+// Check if drawit state exists, and initialize only if needed
+let state = null;
+
+if (options?.drawit) {
+  state = svg.node().__drawit__ || {};
+  state.delayed_layers = state.delayed_layers || [];
+  svg.node().__drawit__ = state;
 }
-
-
-// Make sure drawit state exists
-const state = svg.node().__drawit__ || {};
-state.delayed_layers = state.delayed_layers || [];
-svg.node().__drawit__ = state;
-
 
 // Layer render loop  (The LRL, if you will) (this is for the delayed rendering)
 (data.layers || []).forEach(layer => {
@@ -103,7 +94,8 @@ svg.node().__drawit__ = state;
   if (typeof renderer !== "function") return;
 
   // Delay if requested
-  if (layer.show_on_finish) {
+  if (options?.drawit && layer.show_on_finish) { // We don't want a show on finish for sketchit
+    const state = svg.node().__drawit__;
     state.delayed_layers.push(layer);
     return;   // DO NOT render now
   }
@@ -111,3 +103,28 @@ svg.node().__drawit__ = state;
   // Otherwise render immediately :)
   renderer(svg, plot, layer);
 });
+
+
+// ---------- Interaction modules
+
+// Attach drawit if called
+if (options?.drawit && window.youdrawitAttachDrawit) {
+  window.youdrawitAttachDrawit(
+    svg,
+    width,
+    height,
+    data.layers?.[0]?.data,
+    options
+  );
+}
+
+// Attach sketchit if called
+if (options?.sketchit && window.youdrawitAttachSketchit) {
+  window.youdrawitAttachSketchit(
+    svg,
+    width,
+    height,
+    data.layers?.[0]?.data,
+    options
+  );
+}

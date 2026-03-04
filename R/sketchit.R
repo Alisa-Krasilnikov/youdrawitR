@@ -5,9 +5,12 @@
 #' @param width The width of the desired D3 graph
 #' @param height The height of the desired D3 graph
 #' @param shiny_message_loc The location of your shiny message
-#' @param show_on_finish Whether you want a second plot to appear once the user finishes drawing
+#' @param color_options Whether or not you want the pallette to show up with multiple options
+#' @param starting_color The first color you want your user to sketch with
+#' @param palette What colors you want your user to pick from
+#' @param stroke_width The widths of the strokes
 #' @importFrom r2d3 r2d3
-#' @return An r2d3 htmlwidget rendering the scatterplot
+#' @return An r2d3 htmlwidget rendering the plot
 #' @examples
 #' library(ggplot2)
 #'
@@ -16,69 +19,26 @@
 #'   geom_point(size = 2, colour = "magenta") +
 #'   labs(x = "Weight", y = "MPG")
 #'
-#' drawit(p)
+#' sketchit(p)
 #'
 #'## Pipe-friendly usage
 #' (ggplot(mtcars, aes(x = wt, y = mpg)) +
 #'   geom_point(size = 2, colour = "magenta") +
 #'   labs(x = "Weight", y = "MPG")) |>
-#'   drawit()
+#'   sketchit()
 #' @export
-
-#Testing:
-  # - See if works with negative data
-  # - Packagedown website with vignettes and stuff
-  # - Guidebox toggle options
-
-drawit <- function(p, ..., width = NULL, height = NULL,
-                   shiny_message_loc = NULL, show_on_finish = FALSE) {
-
-  if (!inherits(p, "ggplot")) {
-    stop("drawit() expects a ggplot object. Did you pipe a data frame by accident?")
-  }
-
-  #### BEEP BEEP: Payload called here ####
+sketchit <- function(p, ..., width = NULL, height = NULL,
+                   shiny_message_loc = NULL, color_options = TRUE,
+                   starting_color = "steelblue",
+                   palette = NULL, stroke_width = 2){
   payload <- ggplot_youdrawit_payload(p)
-  ########################################
-
-  num_layers <- length(payload$layers)
-
-  # The widget only supports up to two layers:
-    # - the base (visible immediately)
-    # - an optional additional layer (can be delayed, if preferred - show_on_finish = TRUE)
-
-  if (num_layers > 2) {
-    warning(
-      "More than two ggplot layers detected. ",
-      "Only the first two layers will be used; additional layers will be ignored",
-      call. = FALSE
-    )
-  }
-
-  if (num_layers < 2 && show_on_finish) {
-    warning(
-      "No secondary plot detected. ",
-      "show_on_finish argument ignored",
-      call. = FALSE
-    )
-  }
-
-  # Only keep first two layers (Even if more were supplied)
-  payload$layers <- payload$layers[1:min(2, length(payload$layers))]
-
-  # Sort data by X-axis
-  x_var <- rlang::as_label(p$mapping$x)
-  p$data <- p$data[order(p$data[[x_var]]), ]
-
-  # If show_on_finish = TRUE and we have more than one layer mark all layers after the first to be delayed
-  if (show_on_finish && length(payload$layers) > 1) {
-    for (i in 2:length(payload$layers)) {
-      payload$layers[[i]]$show_on_finish <- TRUE
-    }
-  }
 
   options <- list(
-    drawit = TRUE, # Tells MultiLayer that this is drawit
+    sketchit = TRUE, # Tells MultiLayer that this is sketchit
+    color_options = color_options,
+    starting_color = starting_color,
+    palette = palette,
+    stroke_width = stroke_width,
     shiny_message_loc = shiny_message_loc
   )
 
@@ -86,10 +46,10 @@ drawit <- function(p, ..., width = NULL, height = NULL,
   # Each geom type has its own renderer file (line.js, point.js, smooth.js)
   deps <- vapply(payload$layers, function(layer) {
     system.file(paste0("d3/", layer$geom_type, ".js"), package = "youdrawitR")
-    }, character(1))
+  }, character(1))
 
-  # Need drawit
-  deps <- c(deps, system.file("d3/drawit.js", package = "youdrawitR"))
+  # Need sketchit
+  deps <- c(deps, system.file("d3/sketchit.js", package = "youdrawitR"))
 
   # Create the r2d3 widget
   youdrawit_plot <- r2d3(
@@ -119,7 +79,10 @@ drawit <- function(p, ..., width = NULL, height = NULL,
 
       tibble::tibble(
         x = unlist(msg$x, use.names = FALSE),
-        y = unlist(msg$y, use.names = FALSE)
+        y = unlist(msg$y, use.names = FALSE),
+        color = unlist(msg$color, use.names = FALSE),
+        order = unlist(msg$order, use.names = FALSE),
+        line_id = unlist(msg$line_id, use.names = FALSE)
       )
     })
 
