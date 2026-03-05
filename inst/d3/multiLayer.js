@@ -5,6 +5,7 @@ const scales = data.scales;
 // Note: data already normalized. Could add it here centrally? But works for window
 
 // This used to be in depricated scatter.js
+
 const margin = { top: 20, right: 20, bottom: 45, left: 55 };
 const innerW = width - margin.left - margin.right;
 const innerH = height - margin.top - margin.bottom;
@@ -37,6 +38,16 @@ const overlay = g.append("rect")
   .attr("fill", "transparent")
   .style("pointer-events", "all");
 
+// I'm tired of accidentally highlighting the axes
+// disable text selection and dragging effects on the SVG
+svg.style("user-select", "none")
+   .style("-webkit-user-select", "none") // Chrome and Safari
+   .style("-moz-user-select", "none") // Firefox
+   .style("-ms-user-select", "none"); // Edge
+
+// Prevent pointer events from selecting axes text or lines
+g.selectAll("text, line").style("pointer-events", "none"); // "don't highlight the axes"
+
 // Axis labels
 if (labels.x) {
   g.append("text")
@@ -44,6 +55,7 @@ if (labels.x) {
     .attr("x", innerW / 2)
     .attr("y", innerH + 40)
     .attr("text-anchor", "middle")
+    .style("font-family", "sans-serif") // Looks like ggplot
     .text(labels.x);
 }
 
@@ -54,6 +66,7 @@ if (labels.y) {
     .attr("x", -innerH / 2)
     .attr("y", -40)
     .attr("text-anchor", "middle")
+    .style("font-family", "sans-serif")
     .text(labels.y);
 }
 
