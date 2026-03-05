@@ -130,12 +130,23 @@
 
     // Buttons --------------------------------------------
     if (!state.buttonGroup) {
-      const margin = 10; // spacing from top/right
+
+      const buttonWidth = 60;
+      const padding = 15;
+
+      if (options.button_position && options.button_position.length === 2) {
+        const bx = Math.max(0, Math.min(1, options.button_position[0])); //Snap to 0 or 1 if too big/small
+        const by = Math.max(0, Math.min(1, options.button_position[1]));
+
+        buttonX = padding + bx * (width - buttonWidth - 2 * padding);
+        buttonY = padding + (1 - by) * (height - 105 - 2 * padding);
+      }
+
       const buttonGroup = svg.append("g").attr("class", "sketchit-buttons");
 
       // Undo button -------
       const undoButton = buttonGroup.append("g")
-        .attr("transform", `translate(${width - 70}, ${margin})`)
+        .attr("transform", `translate(${buttonX}, ${buttonY})`)
         .style("cursor", "pointer")
         .on("click", undoLastLine);
 
@@ -154,11 +165,12 @@
         .attr("text-anchor", "middle")
         .attr("alignment-baseline", "middle")
         .attr("font-size", 14)
+        .style("font-family", "sans-serif")
         .text("Undo");
 
       // Reset button -------
       const resetButton = buttonGroup.append("g")
-        .attr("transform", `translate(${width - 70}, ${margin + 35})`)
+        .attr("transform", `translate(${buttonX}, ${buttonY + 35})`)
         .style("cursor", "pointer")
         .on("click", resetDrawing);
 
@@ -177,11 +189,12 @@
         .attr("text-anchor", "middle")
         .attr("alignment-baseline", "middle")
         .attr("font-size", 14)
+        .style("font-family", "sans-serif")
         .text("Reset");
 
       // Done button -------
       const doneButton = buttonGroup.append("g")
-        .attr("transform", `translate(${width - 70}, ${margin + 70})`)
+        .attr("transform", `translate(${buttonX}, ${buttonY + 70})`)
         .style("cursor", "pointer")
         .on("click", () => {
           doneDrawing();
@@ -204,6 +217,7 @@
         .attr("text-anchor", "middle")
         .attr("alignment-baseline", "middle")
         .attr("font-size", 14)
+        .style("font-family", "sans-serif")
         .text("Done");
 
       // Color palette buttons -------
@@ -211,7 +225,7 @@
 
         let palette = (options.palette && options.palette.length > 0)
         ? [...options.palette] // start with user-given palette
-        : ["steelblue", "orange", "green", "red", "purple"]; // switch to default if needed
+        : ["steelblue", "orange", "green", "red"]; // switch to default if needed
 
         // Add starting_color if given, or take the first from palette
         const starting = options.starting_color ?? palette[0];
@@ -230,7 +244,7 @@
         // Layout variables
         const squareSize = 12;
         const spacing = 2;   // space between squares
-        const colorsPerRow = 5;
+        const colorsPerRow = 4;
 
         // Figure out how many rows and columns we need for our color squares to prevent crowding
         palette.forEach((c, i) => {
@@ -239,8 +253,8 @@
 
           buttonGroup.append("rect")
             .attr("class", "color-button")
-            .attr("x", width - 70 + col * (squareSize + spacing))
-            .attr("y", margin + 105 + row * (squareSize + spacing))
+            .attr("x", buttonX + 3 + col * (squareSize + spacing))
+            .attr("y", buttonY + 105 + row * (squareSize + spacing))
             .attr("width", squareSize)
             .attr("height", squareSize)
             .style("fill", c)
@@ -264,7 +278,7 @@
         state.currentColor = options.starting_color ?? "steelblue";
       }
 
-      state.buttonGroup = buttonGroup; // I don't remember why I have this
+      state.buttonGroup = buttonGroup; // Don't delete this
     }
 
     // On drag functionality

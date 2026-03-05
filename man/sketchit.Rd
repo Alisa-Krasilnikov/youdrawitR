@@ -11,9 +11,10 @@ sketchit(
   height = NULL,
   shiny_message_loc = NULL,
   color_options = TRUE,
-  starting_color = "steelblue",
+  starting_color = NULL,
   palette = NULL,
-  stroke_width = 2
+  stroke_width = 2,
+  button_position = c(1, 1)
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ sketchit(
 \item{palette}{What colors you want your user to pick from}
 
 \item{stroke_width}{The widths of the strokes}
+
+\item{button_position}{Where you want the buttons to live on the graph}
 }
 \value{
 An r2d3 htmlwidget rendering the plot

@@ -9,6 +9,7 @@
 #' @param starting_color The first color you want your user to sketch with
 #' @param palette What colors you want your user to pick from
 #' @param stroke_width The widths of the strokes
+#' @param button_position Where you want the buttons to live on the graph
 #' @importFrom r2d3 r2d3
 #' @return An r2d3 htmlwidget rendering the plot
 #' @examples
@@ -30,7 +31,8 @@
 sketchit <- function(p, ..., width = NULL, height = NULL,
                    shiny_message_loc = NULL, color_options = TRUE,
                    starting_color = NULL,
-                   palette = NULL, stroke_width = 2){
+                   palette = NULL, stroke_width = 2,
+                   button_position = c(1, 1)){
   payload <- ggplot_youdrawit_payload(p)
 
   options <- list(
@@ -39,7 +41,8 @@ sketchit <- function(p, ..., width = NULL, height = NULL,
     starting_color = starting_color,
     palette = palette,
     stroke_width = stroke_width,
-    shiny_message_loc = shiny_message_loc
+    shiny_message_loc = shiny_message_loc,
+    button_position = button_position
   )
 
   # Dynamically determine which JavaScript files to load
