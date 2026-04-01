@@ -45,13 +45,15 @@
   // Only really care if it's done or not, used later
   function get_user_line_status(state) {
     const drawable_points = state.drawable_points || [];
-    const num_points = drawable_points.length;
-    const num_filled = d3.sum(drawable_points.map(d => d.y === null ? 0 : 1));
-    const num_starting_filled = state.free_draw ? 0 : (state.pin_start ? 1 : 0);
+    const relevant = drawable_points.slice(state.start_index); // We only care about the points after draw start
 
-    if (num_filled === num_starting_filled) return "unstarted";
-    if (num_points === num_filled) return "done";
+    const num_points = relevant.length;
+    const num_filled = d3.sum(relevant.map(d => d.y == null ? 0 : 1));
+
+    if (num_filled === 0) return "unstarted";
+    if (num_filled === num_points) return "done";
     return "in_progress";
+
   }
 
   // Based on Dillon's code, redone, used to prevent "jumping" between gaps
@@ -164,26 +166,54 @@
       i === 0 || (d.x - arr[i - 1].x) > EPS
     );
 
-    // If free_draw mode is on every point starts with y = null meaning the user must draw everything
-    if (state.free_draw) {
-      return interpolated.map(d => ({ x: d.x, y: null }));
-    }
+    // Extend to full domain
+    const domain = state.x_domain || d3.extent(sorted, d => d.x);
+    // get dynamic spacing
+    const step = get_dynamic_x_by(interpolated) || (domain[1] - domain[0]) / 100;
 
-    // Otherwise if pin_start is true, keep the first point’s original y-value
-    // All other points start as null and must be drawn by the user
-    // NOT YET TESTED!!!!!!
-    return interpolated.map((d, i) => ({
-      x: d.x,
-      y: i === 0 && state.pin_start ? sorted[0].y : null // this makes pinning "optional"
-      // The logic is roughly the same, this just makes more intuitive sense
-    }));
+    const extended = [];
+
+    // LEFT EXTENSION (this was so hard)
+    let xLeft = interpolated[0].x;
+      while (xLeft > domain[0]) {
+        xLeft -= step;
+        if (xLeft >= domain[0]) {
+          extended.push({ x: xLeft, y: null });
+        }
+      }
+
+      extended.reverse(); // keep order increasing
+
+      // Middle (same as b4)
+      extended.push(...interpolated);
+
+      // Right
+      let xRight = interpolated[interpolated.length - 1].x;
+      while (xRight < domain[1]) {
+        xRight += step;
+        if (xRight <= domain[1]) {
+          extended.push({ x: xRight, y: null });
+        }
+      }
+
+      // Compute draw_start index
+      state.start_index = extended.findIndex(d => d.x >= state.draw_start);
+      if (state.start_index < 0) state.start_index = 0;
+
+      // initialize all as empty
+      return extended.map((d, i) => ({
+        x: d.x,
+        y: (i === state.start_index && state.pin_start)
+        ? d.y
+        : null
+      }));
   }
 
   function fill_in_closest_point(state, drag_x, drag_y) {
-    const { drawable_points, pin_start, free_draw } = state;
+    const { drawable_points } = state;
     let last_dist = Infinity;
     let closest_index = drawable_points.length - 1;
-    const start_index = free_draw ? 0 : (pin_start ? 1 : 0);
+    const start_index = state.start_index;
 
     for (let i = start_index; i < drawable_points.length; i++) {
       const dist = Math.abs(drawable_points[i].x - drag_x);
@@ -191,9 +221,10 @@
         closest_index = i - 1;
         break;
       }
-      last_dist = dist;
-    }
-    drawable_points[closest_index].y = drag_y;
+
+    last_dist = dist;
+  }
+  drawable_points[closest_index].y = drag_y;
   }
 
   function make_line_drawer(x, y) {
@@ -232,13 +263,15 @@
     let drawSpace = 0;
 
     if (status === "unstarted") {
-      drawSpace = state.free_draw ? 0 : x(state.draw_start); // free draw conditional rewritten
+      drawSpace = x(state.drawable_points[state.start_index]?.x || state.draw_start); // free draw conditional erased
     } else if (status === "done") {
       drawSpace = w + 10000;
 
 
     } else { // This entire section was rewritten. This is what makes the yellow box move up to user line
-      const null_points = state.drawable_points.filter(d => d.y == null);
+      const null_points = state.drawable_points
+        .slice(state.start_index)
+        .filter(d => d.y == null);
       if (null_points.length) {
         const dynamic_x_by = get_dynamic_x_by(state.drawable_points);
         drawSpace = Math.max(0, x(null_points[0].x - dynamic_x_by)); // Uses dynamic x_by
@@ -351,7 +384,7 @@
     state.plot = plot;
     state.line_data = rowsFrom(data); // Adjusted because of the gapping issue
     options = options || {};
-    state.free_draw = !!options.free_draw;
+    state.x_domain = options.x_domain || null;
     state.pin_start = !!options.pin_start;
     state.draw_start = options.draw_start != null
       ? +options.draw_start

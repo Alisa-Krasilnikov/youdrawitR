@@ -2,25 +2,38 @@
 % Please edit documentation in R/ggplot_youdrawit_payload.R
 \name{ggplot_youdrawit_payload}
 \alias{ggplot_youdrawit_payload}
-\title{Take in a ggplot2 graph and extract data for rerendering in D3}
+\title{Extract ggplot2 data for D3 rendering}
 \usage{
 ggplot_youdrawit_payload(p)
 }
 \arguments{
-\item{p}{A ggplot2 graph}
+\item{p}{A \code{ggplot2} object.}
 }
 \value{
-A dataframe containing information needed to render a ggplot into D3 through youdrawit functions
+A data frame containing the processed data needed to render the plot
+in D3, including scaled x and y values and aesthetic attributes.
 }
 \description{
-Take in a ggplot2 graph and extract data for rerendering in D3
+Takes a ggplot2 object and extracts the underlying data and layout
+information required to re-render the plot using D3. This function
+processes the output of \code{ggplot2::ggplot_build()} to obtain
+scaled data, panel information, and aesthetic mappings.
+}
+\details{
+This function is primarily intended for internal use within the youdrawit
+workflow. It extracts post-scale data from \code{ggplot_build()}, meaning
+that all transformations have already been applied.
+
+The resulting structure is used as the input payload for downstream rendering
+functions such as \code{drawit()} and \code{sketchit()}.
 }
 \examples{
 library(ggplot2)
 
 p <- ggplot(mtcars, aes(x = wt, y = mpg)) +
-          geom_point(size = 2, colour = "magenta") +
-          labs(x = "Weight", y = "MPG")
+  geom_point(size = 2, colour = "magenta") +
+  labs(x = "Weight", y = "MPG")
 
 ggplot_youdrawit_payload(p)
+
 }

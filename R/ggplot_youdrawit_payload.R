@@ -1,16 +1,33 @@
-#' Take in a ggplot2 graph and extract data for rerendering in D3
+#' Extract ggplot2 data for D3 rendering
 #'
-#' @param p A ggplot2 graph
-#' @importFrom ggplot2 ggplot_build
-#' @return A dataframe containing information needed to render a ggplot into D3 through youdrawit functions
+#' Takes a ggplot2 object and extracts the underlying data and layout
+#' information required to re-render the plot using D3. This function
+#' processes the output of \code{ggplot2::ggplot_build()} to obtain
+#' scaled data, panel information, and aesthetic mappings.
+#'
+#' @param p A \code{ggplot2} object.
+#'
+#' @return A data frame containing the processed data needed to render the plot
+#' in D3, including scaled x and y values and aesthetic attributes.
+#'
+#' @details
+#' This function is primarily intended for internal use within the youdrawit
+#' workflow. It extracts post-scale data from \code{ggplot_build()}, meaning
+#' that all transformations have already been applied.
+#'
+#' The resulting structure is used as the input payload for downstream rendering
+#' functions such as \code{drawit()} and \code{sketchit()}.
+#'
 #' @examples
 #' library(ggplot2)
 #'
 #' p <- ggplot(mtcars, aes(x = wt, y = mpg)) +
-#'           geom_point(size = 2, colour = "magenta") +
-#'           labs(x = "Weight", y = "MPG")
+#'   geom_point(size = 2, colour = "magenta") +
+#'   labs(x = "Weight", y = "MPG")
 #'
 #' ggplot_youdrawit_payload(p)
+#'
+#' @importFrom ggplot2 ggplot_build
 #' @export
 
 ggplot_youdrawit_payload <- function(p) {
@@ -21,6 +38,10 @@ ggplot_youdrawit_payload <- function(p) {
   # trained scales
   x_scale <- b$layout$panel_scales_x[[1]]
   y_scale <- b$layout$panel_scales_y[[1]]
+
+  # limits if present
+  x_domain <- if (!is.null(x_scale$limits)) x_scale$limits else x_scale$range$range
+  y_domain <- if (!is.null(y_scale$limits)) y_scale$limits else y_scale$range$range
 
   # Can't use datetime yet
   if (
@@ -62,10 +83,10 @@ ggplot_youdrawit_payload <- function(p) {
 
   list(
     layers = layers_list,
-    labels = p$labels,
+    labels = p$labels, # title and subtitle in labels
     scales = list(
-      x_domain = x_scale$range$range,
-      y_domain = y_scale$range$range
+      x_domain = x_domain,
+      y_domain = y_domain
     )
   )
 }
