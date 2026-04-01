@@ -4,6 +4,8 @@
     // pop: removes something from the end of an array
     // (Not really a need to do anything in the middle)
 
+  // Fix the drawing bug
+
   // Attach sketchit state to the SVG DOM node
   function ensureState(svg) {
     const root = svg.node();
@@ -24,15 +26,18 @@
     state.plot = plot;
 
     const { overlay, g, x: xScale, y: yScale } = plot;
+    overlay.raise(); // Key line
 
     state.paths = [];
     state.currentPath = null;
     state.currentData = [];
-    state.isDrawing = true;  // initially allow drawing
-    state.isDone = false;    // flag for "Done"
+    state.isDrawing = true; // initially allow drawing
+    state.isDone = false; // flag for "Done"
     state.strokeWidth = options.stroke_width || 2;
     // These are for the Shiny implementation
     state.completedLines = [];
+    state.maxLines = options.max_lines ?? Infinity;
+    state.minLines = options.min_lines ?? 1;
     state.drawOrderCounter = 0;
     state.shiny_message_loc = options.shiny_message_loc;
 
@@ -40,6 +45,12 @@
     // This is the actual drawing function
     function startNewLine(color) {
       if (state.isDone) return;  // prevent drawing if done
+
+      if (state.completedLines.length >= state.maxLines) {
+        showMessage(`Maximum of ${state.maxLines} lines reached.`);
+        return;
+      }
+
       state.currentColor = color || state.currentColor;
       state.currentData = [];
       state.currentPath = g.append("path")
@@ -62,14 +73,21 @@
 
       // remove the undid lines from shiny data
       state.completedLines.pop();
-      if (state.drawOrderCounter > 0) { // don't let the counter fall below 0
-        state.drawOrderCounter--;
-      }
     }
 
     // Done function, used with done button (see drag behavior also)
     function doneDrawing() {
+      if (state.completedLines.length < state.minLines) {
+        showMessage(`Draw at least ${state.minLines} line(s) before finishing.`);
+        return;
+      }
+
       state.isDone = true; // send on done
+
+      // make the Done button red on click
+      if (state.doneButton) {
+        state.doneButton.select("rect").style("fill", "red");
+      }
 
       // This is done a little different from drawit since there's no need for a drawable_points thing
       if (state.shiny_message_loc && typeof Shiny !== "undefined") {
@@ -127,6 +145,41 @@
       state.completedLines = [];
       state.drawOrderCounter = 0;
     }
+
+    // Messaging function -----------
+    function showMessage(text) {
+      // remove old message if exists
+      svg.selectAll(".sketchit-message").remove();
+
+      const msg = svg.append("g")
+        .attr("class", "sketchit-message");
+
+        msg.append("rect")
+          .attr("x", width / 2 - 120)
+          .attr("y", 10)
+          .attr("width", 240)
+          .attr("height", 30)
+          .attr("rx", 6)
+          .style("fill", "#333")
+          .style("opacity", 0.9);
+
+        msg.append("text")
+          .attr("x", width / 2)
+          .attr("y", 30)
+          .attr("text-anchor", "middle")
+          .attr("fill", "white")
+          .style("font-size", "12px")
+          .style("font-family", "sans-serif")
+          .text(text);
+
+      // fade out
+      setTimeout(() => {
+        msg.transition()
+          .duration(500)
+          .style("opacity", 0)
+          .remove();
+      }, 2000);
+}
 
     // Buttons --------------------------------------------
     if (!state.buttonGroup) {
@@ -198,9 +251,9 @@
         .style("cursor", "pointer")
         .on("click", () => {
           doneDrawing();
-          // make the Done button red on click
-          doneButton.select("rect").style("fill", "red");
         });
+
+      state.doneButton = doneButton;
 
       doneButton.append("rect")
         .attr("width", 60)
@@ -288,13 +341,19 @@
       d3.drag()
         .on("start", function(event) {
           if (state.isDone) return;
+
+          if (state.completedLines.length >= state.maxLines) {
+            showMessage(`Maximum of ${state.maxLines} lines reached.`);
+            return;
+          }
+
           startNewLine(); // always start a new line on drag
-          const [mx, my] = d3.pointer(event, g.node());
+          const [mx, my] = d3.pointer(event, g.node())
           state.currentData.push({ x: xScale.invert(mx), y: yScale.invert(my) });
         })
         .on("drag", function(event) {
           if (state.isDone || !state.currentPath) return;
-          const [mx, my] = d3.pointer(event, g.node());
+          const [mx, my] = d3.pointer(event, g.node()) ;
           state.currentData.push({ x: xScale.invert(mx), y: yScale.invert(my) });
 
           const line = d3.line()

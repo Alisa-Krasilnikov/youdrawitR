@@ -1,40 +1,75 @@
-#' Render a ggplot scatterplot as D3 via r2d3
+#' Interactive drawing on \code{ggplot2} visualizations using D3
 #'
-#' @param p A ggplot2 graph
-#' @param ... Additional arguments passed to r2d3()
-#' @param width The width of the desired D3 graph
-#' @param height The height of the desired D3 graph
-#' @param shiny_message_loc The location of your shiny message
-#' @param show_on_finish Whether you want a second plot to appear once the user finishes drawing
-#' @importFrom r2d3 r2d3
-#' @return An r2d3 htmlwidget rendering the scatterplot
+#' The drawit function allows the user to draw a single, continuous, one-to-one
+#' line. This is particularly useful for tasks in which the user is expected to
+#' estimate trends or sketch expected relationships in the data.
+#'
+#'
+#' @param p A \code{ggplot2} object.
+#' @param ... Additional arguments passed
+#' @param width Width of the output widget in **pixels**.
+#' @param height Height of the output widget in **pixels**.
+#' @param shiny_message_loc Name of the Shiny input/output binding used for messaging.
+#' @param show_on_finish If \code{TRUE}, displays a secondary geom after the user finishes drawing. Note that this will always be the second geom layer within your \code{ggplot2} object.
+#' @param draw_start Specifies where drawing interaction begins, on the scale of your data.
+#'
+#' @details
+#' For more flexible, free-form drawing, see \code{sketchit()}.
+#'
+#' Currently, drawit can support \code{geom_scatter}, \code{geom_line}, and
+#' \code{geom_smooth}, with a maximum of two geoms per plot.
+#'
+#' A highlighted region indicates where drawing is permitted. Users draw from
+#' left to right, and the interface provides visual feedback when portions of the
+#' data range have not yet been covered.
+#'
+#' The drawing resolution is tied to the x-values in the data. As a result,
+#' extending the x-axis far beyond the observed data without adjusting
+#' \code{draw_start} may lead to an overly granular drawing experience
+#'
+#' @section Shiny Integration:
+#' When used within a \code{shiny} application, the widget returns the
+#' recorded drawing data as a structured object once the user has filled
+#' the drawable region. Each x-value in the original data is paired with
+#' a corresponding user-drawn y-value.
+#'
+#' The returned data includes:
+#'
+#' \itemize{
+#'   \item \code{x}: The x-values from the original data, along with
+#'   additional interpolated points used to ensure smooth drawing
+#'   \item \code{y}: The user-drawn y-values corresponding to each x
+#' }
+#'
+#' Because \code{drawit()} enforces a single continuous line, the output
+#' represents a fully specified function over the domain of the data.
+#'
+#' @return An \code{r2d3} htmlwidget.
 #' @examples
-#' library(ggplot2)
-#'
-#' ## Basic usage
+#' \dontrun{
+#' # Basic usage
 #' p <- ggplot(mtcars, aes(x = wt, y = mpg)) +
 #'   geom_point(size = 2, colour = "magenta") +
 #'   labs(x = "Weight", y = "MPG")
 #'
 #' drawit(p)
 #'
-#'## Pipe-friendly usage
+#' # Pipe-friendly usage
 #' (ggplot(mtcars, aes(x = wt, y = mpg)) +
 #'   geom_point(size = 2, colour = "magenta") +
 #'   labs(x = "Weight", y = "MPG")) |>
 #'   drawit()
+#'}
+#' @importFrom r2d3 r2d3
 #' @export
 
-#Testing:
-  # - See if works with negative data
-  # - Packagedown website with vignettes and stuff
-  # - Guidebox toggle options
-
 drawit <- function(p, ..., width = NULL, height = NULL,
-                   shiny_message_loc = NULL, show_on_finish = FALSE) {
+                   shiny_message_loc = NULL, show_on_finish = FALSE,
+                   draw_start = NULL) {
 
   if (!inherits(p, "ggplot")) {
-    stop("drawit() expects a ggplot object. Did you pipe a data frame by accident?")
+    stop("drawit() expects a ggplot object. Did you make sure to wrap the ggplot in ",
+         "parentheses before piping it in?")
   }
 
   #### BEEP BEEP: Payload called here ####
@@ -79,7 +114,8 @@ drawit <- function(p, ..., width = NULL, height = NULL,
 
   options <- list(
     drawit = TRUE, # Tells MultiLayer that this is drawit
-    shiny_message_loc = shiny_message_loc
+    shiny_message_loc = shiny_message_loc,
+    draw_start = draw_start
   )
 
   # Dynamically determine which JavaScript files to load

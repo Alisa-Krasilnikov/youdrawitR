@@ -23,6 +23,7 @@ window.renderSmoothLayer = function(svg, plot, layer) {
   const rows = asRows(layer.data);
 
   const line = d3.line()
+    .defined(d => d.y != null && !isNaN(d.y)) // handle missing values
     .x(d => x(d.x))
     .y(d => y(d.y));
 

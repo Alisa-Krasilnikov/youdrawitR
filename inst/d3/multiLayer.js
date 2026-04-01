@@ -3,10 +3,26 @@ const labels = data.labels || {};
 const scales = data.scales;
 
 // Note: data already normalized. Could add it here centrally? But works for window
+// check if title
+const title = labels.title;
+const subtitle = labels.subtitle;
+
+const hasTitle = !!labels.title;
+const hasSubtitle = !!labels.subtitle;
+
+const titleBlockHeight =
+  (hasTitle ? 20 : 0) +
+  (hasSubtitle ? 15 : 0);
+
+
+const margin = {
+  top: 20 + titleBlockHeight,
+  right: 20,
+  bottom: 45,
+  left: 55
+};
 
 // This used to be in depricated scatter.js
-
-const margin = { top: 20, right: 20, bottom: 45, left: 55 };
 const innerW = width - margin.left - margin.right;
 const innerH = height - margin.top - margin.bottom;
 
@@ -55,6 +71,7 @@ if (labels.x) {
     .attr("x", innerW / 2)
     .attr("y", innerH + 40)
     .attr("text-anchor", "middle")
+    .style("font-size", "12px") // Make em smaller
     .style("font-family", "sans-serif") // Looks like ggplot
     .text(labels.x);
 }
@@ -66,8 +83,32 @@ if (labels.y) {
     .attr("x", -innerH / 2)
     .attr("y", -40)
     .attr("text-anchor", "middle")
+    .style("font-size", "12px")
     .style("font-family", "sans-serif")
     .text(labels.y);
+}
+
+// Title/subtitles
+let currentY = 15;
+
+if (title) {
+  svg.append("text")
+    .attr("x", margin.left)
+    .attr("y", currentY)
+    .style("font-family", "sans-serif")
+    .text(title);
+
+  currentY += 18;
+}
+
+if (subtitle) {
+  svg.append("text")
+    .attr("x", margin.left)
+    .attr("y", currentY)
+    .style("font-size", "12px") // smaller than title
+    .style("fill", "#4D4D4D") // softer gray (closer to ggplot)
+    .style("font-family", "sans-serif")
+    .text(subtitle);
 }
 
 
@@ -82,7 +123,9 @@ const plot = {
   w: innerW,
   h: innerH,
   margin,
-  labels
+  labels,
+  title,
+  subtitle
 };
 
 svg.node().__plot__ = plot;
@@ -119,6 +162,8 @@ if (options?.drawit) {
 
 
 // ---------- Interaction modules
+
+options.x_domain = scales.x_domain;
 
 // Attach drawit if called
 if (options?.drawit && window.youdrawitAttachDrawit) {

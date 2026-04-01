@@ -20,9 +20,12 @@ window.renderLineLayer = function(svg, plot, layer) {
     return [];
   }
 
-  const rows = asRows(layer.data);
+  const rows = asRows(layer.data)
+    .filter(d => d.x != null && d.y != null)
+    .sort((a, b) => +a.x - +b.x); // Sorting AGAIN because D3
 
   const line = d3.line()
+    .defined(d => d.y != null && !isNaN(d.y)) // handle missing values
     .x(d => x(+d.x))
     .y(d => y(+d.y));
 

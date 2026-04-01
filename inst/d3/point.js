@@ -20,7 +20,13 @@ window.renderPointLayer = function(svg, plot, layer) {
     return [];
   }
 
-  const pts = asRows(layer.data);
+  // Handle missing data
+  const pts = asRows(layer.data).filter(d => {
+    return (
+      d.x != null && !isNaN(d.x) &&
+      d.y != null && !isNaN(d.y)
+      );
+  });
 
   const rDefault = layer.aes_params?.size ?? 3;
   const alphaDefault = layer.aes_params?.alpha ?? 1;
