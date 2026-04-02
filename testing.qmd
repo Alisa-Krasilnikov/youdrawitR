@@ -1,0 +1,80 @@
+---
+title: "testing_document"
+format: html
+editor: visual
+---
+
+```{r}
+library(ggplot2)
+library(svglite)
+library(r2d3)
+library(tibble)
+library(jsonlite)
+library(youdrawitR)
+
+```
+
+```{r}
+data = tibble(x = seq(1, 25, .5), 
+              y = exp((x-15)/30),
+              ypoints = exp(((x-15)/30) + rnorm(30, 0, 0.1)))
+data$Group <- sample(c("Group_1", "Group_2", "Group_3"),
+                     size = nrow(data),
+                     replace = TRUE)
+```
+
+```{r}
+ggplot(data, aes(x, ypoints)) +
+  geom_point(size = 2, colour = "magenta") +
+  labs(x = "X-Label", y = "Y-Label")
+```
+
+```{r}
+ggplot(data, aes(x, ypoints)) +
+  geom_point(size = 2, colour = "magenta") +
+  labs(x = "X-Label", y = "Y-Label")
+```
+
+```{r}
+
+data
+summary(data)
+
+
+(ggplot(data, aes(x, ypoints)) +
+  geom_point(data = data %>% mutate(ypoints2 = ifelse(x <= 10, ypoints, NA)),
+             aes(y = ypoints2),
+             size = 2, 
+             colour = "magenta"
+             ) +
+  geom_line(data = data, aes(x = x, y = y)) +
+    scale_x_continuous(limits = c(0, 20)) +
+    scale_y_continuous(limits = c(0, 2)) +
+  labs(x = "X-Label", y = "Y-Label")) |>
+  sketchit()
+
+# why is this happening?
+```
+
+```{r}
+library(dplyr)
+
+df <- full_join(points, mtcars, by = c("x" = "wt"))
+df
+```
+
+```{r}
+df
+```
+
+```{r, warning=FALSE}
+ggplot(data = df)+
+  geom_line(aes(x = x, y = y)) +
+  geom_point(aes(x = x, y = mpg))
+```
+
+```{r}
+ggplot(data = df)+
+  geom_line(aes(x = x, y = y)) +
+  geom_point(aes(x = x, y = mpg))
+```
