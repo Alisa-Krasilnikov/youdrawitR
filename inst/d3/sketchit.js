@@ -58,7 +58,8 @@
         .attr("stroke", state.currentColor)
         .attr("stroke-width", state.strokeWidth)
         .attr("stroke-linecap", "round")
-        .attr("stroke-linejoin", "round"); // Make ends of lines round
+        .attr("stroke-linejoin", "round") // Make ends of lines round
+        .style("pointer-events", "none");
       state.paths.push(state.currentPath);
     }
 
