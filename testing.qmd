@@ -11,6 +11,8 @@ library(r2d3)
 library(tibble)
 library(jsonlite)
 library(youdrawitR)
+library(tidyverse)
+library(dplyr)
 
 ```
 
@@ -30,6 +32,13 @@ ggplot(data, aes(x, ypoints)) +
 ```
 
 ```{r}
+(ggplot(data = penguins, aes(x = bill_length_mm, y = bill_depth_mm)) +
+  geom_point(size = 2)) |> 
+  drawit()
+```
+
+
+```{r}
 ggplot(data, aes(x, ypoints)) +
   geom_point(size = 2, colour = "magenta") +
   labs(x = "X-Label", y = "Y-Label")
@@ -37,23 +46,17 @@ ggplot(data, aes(x, ypoints)) +
 
 ```{r}
 
-data
-summary(data)
-
 
 (ggplot(data, aes(x, ypoints)) +
-  geom_point(data = data %>% mutate(ypoints2 = ifelse(x <= 10, ypoints, NA)),
+  geom_point(data = data |>  mutate(ypoints2 = ifelse(x < 10, ypoints, NA)),
              aes(y = ypoints2),
              size = 2, 
              colour = "magenta"
              ) +
-  geom_line(data = data, aes(x = x, y = y)) +
-    scale_x_continuous(limits = c(0, 20)) +
-    scale_y_continuous(limits = c(0, 2)) +
+  geom_line(data = data |>  mutate(y = ifelse(x < 10, y, NA)),
+            aes(y = y)) +
   labs(x = "X-Label", y = "Y-Label")) |>
-  sketchit()
-
-# why is this happening?
+  drawit(show_on_finish = TRUE)
 ```
 
 ```{r}

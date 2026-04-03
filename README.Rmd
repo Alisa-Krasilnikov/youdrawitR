@@ -94,4 +94,5 @@ These outputs can be accessed via Shiny inputs and used for downstream tasks, su
 This package is under active development. Features and APIs may change as the project evolves.
 
 If you encounter issues or have suggestions, please open an issue at:
+
 https://github.com/Alisa-Krasilnikov/youdrawitR/issues

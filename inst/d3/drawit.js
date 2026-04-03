@@ -135,29 +135,86 @@
   // This basically combines everything so we get the point-based drawable grid
   function setup_drawable_points(state) {
     const raw = state.line_data || [];
-    if (!raw.length) return [];
+
+    // Guard against no data
+    if (!raw.length) {
+      state.start_index = 0;
+      return [];
+    }
+
+    // Guard against nothing to interpolate
+    if (raw.length < 2) {
+      state.start_index = 0;
+      return raw.map(d => ({ x: d.x, y: null }));
+    }
 
     // Make a copy and sort from smallest x to largest x
       // Sorting may be redundant but I'd rather oversort and waste computation
     // copy so we don’t change the original data
     const sorted = raw.slice().sort((a, b) => a.x - b.x);
 
+    // After sorting, deduplicate near-identical x values -------
+    const domain_range = sorted[sorted.length - 1].x - sorted[0].x; // Figure out how spread out the x values are in total
+    const DEDUP_EPS = (domain_range / sorted.length) * 0.001; // Divide that range evenly across all points to get a share per point
+    //take 0.1% of that as our closeness threshold, anything closer than that gets treated as same x value
+    const deduped = [];
+    let group = [sorted[0]];
+
+    for (let i = 1; i < sorted.length; i++) {
+      // Is this point's x close enough to the group's anchor x to be a duplicate?
+      if (sorted[i].x - group[0].x < DEDUP_EPS) {
+        // If yes, shove it into the current group
+        group.push(sorted[i]);
+      }
+      else {
+        // If no, this is a genuinely different x location
+        // Collapse everything in the current group down to one point by averaging all their y values
+        const avgY = d3.mean(group, d => d.y);
+        deduped.push({ x: group[0].x, y: avgY });
+        // Start a fresh group with this point as the new anchor
+        group = [sorted[i]];
+      }
+    }
+    deduped.push({ x: group[0].x, y: d3.mean(group, d => d.y) });
+
+    // Guard against data too small after sort
+    if (deduped.length < 2) {
+      state.start_index = 0;
+      return deduped.map(d => ({ x: d.x, y: null }));
+    }
+
     // Find the spacing between each pair of neighboring points
     const gaps = [];
-    for (let i = 1; i < sorted.length; i++) {
-      gaps.push(sorted[i].x - sorted[i - 1].x);
+    for (let i = 1; i < deduped.length; i++) {
+      gaps.push(deduped[i].x - deduped[i - 1].x);
+    }
+
+    // Guard against no valid gaps
+    if (!gaps.length) {
+      state.start_index = 0;
+      return deduped.map(d => ({ x: d.x, y: null }));
     }
 
     // Find the middle gap (median... because outliers)
     // This helps us understand the "normal" spacing of the data
     const medianGap = gaps.sort((a,b)=>a-b)[Math.floor(gaps.length/2)];
 
+    // Guard if invalid median
+    if (!isFinite(medianGap) || medianGap <= 0) {
+      state.start_index = 0;
+      return deduped.map(d => ({ x: d.x, y: null }));
+    }
+
     // Allow gaps up to twice the normal spacing
     // Bigger gaps will be filled in
     const maxGap = medianGap * 2;
 
     // Fill in large gaps with extra points, see interpolate_gaps function
-    let interpolated = interpolate_gaps(sorted, maxGap);
+    let interpolated = interpolate_gaps(deduped, maxGap);
+
+    if (!interpolated.length) { // Interpolation failed or empty
+      interpolated = deduped;
+    }
 
     // Remove any points that are too close together
     // Google scared me about floating-point issues, so EPS is a very tiny number to avoid them
@@ -166,51 +223,82 @@
       i === 0 || (d.x - arr[i - 1].x) > EPS
     );
 
+    if (!interpolated.length) { // One last check for edge cases
+      interpolated = deduped;
+    }
+
     // Extend to full domain
-    const domain = state.x_domain || d3.extent(sorted, d => d.x);
+    const domain = state.x_domain || d3.extent(deduped, d => d.x);
+    // If Bad domain
+    if (!domain || !isFinite(domain[0]) || !isFinite(domain[1])) {
+      state.start_index = 0;
+      return [];
+    }
     // get dynamic spacing
-    const step = get_dynamic_x_by(interpolated) || (domain[1] - domain[0]) / 100;
+    let step = get_dynamic_x_by(interpolated) || (domain[1] - domain[0]) / 100;
+
+    // If bad step
+    if (!isFinite(step) || step <= 0) {
+      step = (domain[1] - domain[0]) / 100;
+    }
+
+    if (!isFinite(step) || step <= 0) {
+      step = 0.01; // absolute fallback
+    }
 
     const extended = [];
 
     // LEFT EXTENSION (this was so hard)
     let xLeft = interpolated[0].x;
-      while (xLeft > domain[0]) {
-        xLeft -= step;
-        if (xLeft >= domain[0]) {
-          extended.push({ x: xLeft, y: null });
+    let safetyL = 0; // Prevent infinite loops
+    while (xLeft > domain[0] && safetyL < 10000) {
+      safetyL++;
+      xLeft -= step;
+      if (xLeft >= domain[0]) {
+        extended.push({ x: xLeft, y: null });
         }
+    }
+
+    extended.reverse(); // keep order increasing
+
+    // Middle (same as b4)
+    extended.push(...interpolated);
+
+    // Right
+    let xRight = interpolated[interpolated.length - 1].x;
+    let safetyR = 0;
+    while (xRight < domain[1] && safetyR < 10000) {
+      safetyR++;
+      xRight += step;
+      if (xRight <= domain[1]) {
+        extended.push({ x: xRight, y: null });
       }
+    }
 
-      extended.reverse(); // keep order increasing
+    if (!extended.length || extended[0].x > domain[0]) {
+      extended.unshift({ x: domain[0], y: null });
+    }
 
-      // Middle (same as b4)
-      extended.push(...interpolated);
+    if (extended[extended.length - 1].x < domain[1]) {
+      extended.push({ x: domain[1], y: null });
+    }
 
-      // Right
-      let xRight = interpolated[interpolated.length - 1].x;
-      while (xRight < domain[1]) {
-        xRight += step;
-        if (xRight <= domain[1]) {
-          extended.push({ x: xRight, y: null });
-        }
-      }
+    // Compute draw_start index
+    state.start_index = extended.findIndex(d => d.x >= state.draw_start);
+    if (state.start_index < 0) state.start_index = 0;
 
-      // Compute draw_start index
-      state.start_index = extended.findIndex(d => d.x >= state.draw_start);
-      if (state.start_index < 0) state.start_index = 0;
-
-      // initialize all as empty
-      return extended.map((d, i) => ({
-        x: d.x,
-        y: (i === state.start_index && state.pin_start)
-        ? d.y
-        : null
-      }));
+    // initialize all as empty
+    return extended.map((d, i) => ({
+      x: d.x,
+      y: (i === state.start_index && state.pin_start)
+      ? d.y
+      : null
+    }));
   }
 
   function fill_in_closest_point(state, drag_x, drag_y) {
     const { drawable_points } = state;
+    if (!drawable_points || !drawable_points.length) return;
     let last_dist = Infinity;
     let closest_index = drawable_points.length - 1;
     const start_index = state.start_index;
@@ -263,8 +351,16 @@
     let drawSpace = 0;
 
     if (status === "unstarted") {
-      drawSpace = x(state.drawable_points[state.start_index]?.x || state.draw_start); // free draw conditional erased
-    } else if (status === "done") {
+      const startPoint = state.drawable_points[state.start_index];
+      if (!startPoint || !isFinite(startPoint.x)) {
+        drawSpace = 0;
+      }
+      else {
+        drawSpace = x(startPoint.x);
+      }
+    }
+
+    else if (status === "done") {
       drawSpace = w + 10000;
 
 
@@ -274,9 +370,11 @@
         .filter(d => d.y == null);
       if (null_points.length) {
         const dynamic_x_by = get_dynamic_x_by(state.drawable_points);
-        drawSpace = Math.max(0, x(null_points[0].x - dynamic_x_by)); // Uses dynamic x_by
+        drawSpace = x(null_points[0].x - dynamic_x_by); // Uses dynamic x_by
       }
     }
+
+    drawSpace = Math.max(0, Math.min(w, drawSpace));
 
     const draw_region = g.selectAll("rect.draw_region").data([null]);
 
@@ -349,11 +447,12 @@
     if (state.shiny_message_loc) {
       if (typeof Shiny !== "undefined") {
         setTimeout(() => {
+          const filled = state.drawable_points.filter(d => d.y != null);
           Shiny.setInputValue(
             state.shiny_message_loc,
             {
-              x: state.drawable_points.map(d => d.x),
-              y: state.drawable_points.map(d => d.y)
+              x: filled.map(d => d.x),
+              y: filled.map(d => d.y)
             },
             { priority: "event" }
             );
