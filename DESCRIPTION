@@ -17,12 +17,12 @@ Imports:
     r2d3,
     rlang,
     shiny,
-    tibble,
-    webshot, 
-    webshot2
+    tibble
 Depends:
     ggplot2
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    dplyr,
+    palmerpenguins
 VignetteBuilder: knitr
