@@ -22,3 +22,7 @@ Imports:
     webshot2
 Depends:
     ggplot2
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
