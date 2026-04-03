@@ -24,5 +24,6 @@ Suggests:
     knitr,
     rmarkdown,
     dplyr,
-    palmerpenguins
+    palmerpenguins,
+    tidyverse
 VignetteBuilder: knitr
