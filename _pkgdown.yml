@@ -2,7 +2,7 @@ url: https://alisa-krasilnikov.github.io/youdrawitR/
 template:
   bootstrap: 5
   bootswatch: lumen
-
+  logo: man/figures/logo.png
 
 reference:
 - title: All functions

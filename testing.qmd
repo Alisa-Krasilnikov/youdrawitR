@@ -37,7 +37,6 @@ ggplot(data, aes(x, ypoints)) +
   drawit()
 ```
 
-
 ```{r}
 ggplot(data, aes(x, ypoints)) +
   geom_point(size = 2, colour = "magenta") +
