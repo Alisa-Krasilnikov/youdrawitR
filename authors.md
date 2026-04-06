@@ -2,29 +2,33 @@
 
 ## Authors
 
-- **Alisa Krasilnikov**. Maintainer.
+- **Alisa Krasilnikov**. Author, maintainer.  
+  Maintainer status shared between Alisa Krasilnikov and Dr. Emily
+  Robinson
 
-- **Emily A. Robinson**. .
+- **Dillon Murphy**. Author, contributor.
 
-- **Dillon Murphy**. .
+- **Emily Robinson**. Author, contributor.  
+  Maintainer status shared between Alisa Krasilnikov and Dr. Emily
+  Robinson
 
-- **Susan VanderPlas**. .
+- **Heike Hofmann**. Author.
 
-- **Heike Hofmann**. .
+- **Susan VanderPlas**. Author.
 
 ## Citation
 
 Source:
 [`DESCRIPTION`](https://github.com/Alisa-Krasilnikov/youdrawitR/blob/main/DESCRIPTION)
 
-Murphy D, VanderPlas S, Hofmann H, Robinson E, Krasilnikov A (2026).
-*youdrawitR: 'You Draw It'*. R package version 0.1.0,
+Krasilnikov A, Murphy D, Robinson E, Hofmann H, VanderPlas S (2026).
+*youdrawitR: 'You Draw It'*. R package version 1.1.0,
 <https://github.com/Alisa-Krasilnikov/youdrawitR>.
 
     @Manual{,
       title = {youdrawitR: 'You Draw It'},
-      author = {Dillon Murphy and Susan VanderPlas and Heike Hofmann and Emily Robinson and Alisa Krasilnikov},
+      author = {Alisa Krasilnikov and Dillon Murphy and Emily Robinson and Heike Hofmann and Susan VanderPlas},
       year = {2026},
-      note = {R package version 0.1.0},
+      note = {R package version 1.1.0},
       url = {https://github.com/Alisa-Krasilnikov/youdrawitR},
     }

@@ -14,8 +14,8 @@ You can install the development version of youdrawitR from
 [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("pak")
-pak::pak("Alisa-Krasilnikov/youdrawitR")
+#install.packages("devtools")
+devtools::install_github("Alisa-Krasilnikov/youdrawitR")
 ```
 
 ## Usage

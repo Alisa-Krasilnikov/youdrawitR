@@ -91,7 +91,7 @@ styling information from the `ggplot` object you pass into it.
 
 ``` r
 (ggplot(data = mtcars, aes(x = wt, y = mpg)) +
-    geom_line(size = 2, color = "red") +
+    geom_line(linewidth = 2, color = "red") +
     labs(title = "Drawit Cars Example",
          subtitle = "Hope You Enjoy!",
          x = "Weight",
@@ -100,11 +100,6 @@ styling information from the `ggplot` object you pass into it.
    scale_x_continuous(limits = c(1.5, 7))
  ) |> 
   drawit()
-#> Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
-#> ℹ Please use `linewidth` instead.
-#> This warning is displayed once per session.
-#> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-#> generated.
 ```
 
 ### Simulated Data Examples
