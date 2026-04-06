@@ -1,9 +1,17 @@
 Package: youdrawitR
 Type: Package
 Title: 'You Draw It'
-Version: 0.1.0
-Author: Dillon Murphy, Susan VanderPlas, Heike Hofmann, Emily Robinson, Alisa Krasilnikov
-Maintainer: Alisa Krasilnikov, Emily A. Robinson, Dillon Murphy, Susan VanderPlas, Heike Hofmann <alisa.krass@gmail.com>
+Version: 1.1.0
+Authors@R: c(
+    person("Alisa", "Krasilnikov", email = "alisa.krass@gmail.com", role = c("aut", "cre"),
+    comment = "Maintainer status shared between Alisa Krasilnikov and Dr. Emily Robinson"),
+    person("Dillon", "Murphy", role = c("aut", "ctb")),
+    person("Emily", "Robinson", email = "erobin17@calpoly.edu", role = c("aut", "ctb"),
+    comment = "Maintainer status shared between Alisa Krasilnikov and Dr. Emily Robinson"),
+    person("Heike", "Hofmann", role = "aut"),
+    person("Susan", "VanderPlas", role = "aut")
+  )
+Maintainer: Emily A. Robinson <erobin17@calpoly.edu>
 Description: 'You Draw It' is a feature that allows users to interact with a chart
   directly by drawing a line on their computer screen with a mouse. Originally introduced
   by the New York Times in 2015 for the purpose of interactive reading, this package adapts

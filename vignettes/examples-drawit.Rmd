@@ -75,7 +75,7 @@ While `drawit()` is not a perfect replica of `ggplot2`, it does preserve much of
 
 ```{r}
 (ggplot(data = mtcars, aes(x = wt, y = mpg)) +
-    geom_line(size = 2, color = "red") +
+    geom_line(linewidth = 2, color = "red") +
     labs(title = "Drawit Cars Example",
          subtitle = "Hope You Enjoy!",
          x = "Weight",
