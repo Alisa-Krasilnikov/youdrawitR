@@ -28,16 +28,16 @@ pak::pak("Alisa-Krasilnikov/youdrawitR")
 
 ## Usage
 
-Both functions can be used with geom_point, geom_smooth, and geom_line.
-Note that drawit can only be used with two geoms at a time, while
-sketchit supports multiple layers without restrictions.
+Both functions can be used with `geom_point`, `geom_smooth`, and
+`geom_line.` Note that `drawit()` can only be used with two `geoms` at a
+time, while `sketchit()` supports multiple layers without restrictions.
 
-### drawit: Guided Drawing
+### `drawit`: Guided Drawing
 
-drawit() allows users to draw a single continuous line across the plot,
-enforcing a one-to-one mapping between x-values and user-drawn y-values.
-This is particularly useful for assessing how users estimate regression
-lines or expected trends.
+`drawit()` allows users to draw a single continuous line across the
+plot, enforcing a one-to-one mapping between x-values and user-drawn
+y-values. This is particularly useful for assessing how users estimate
+regression lines or expected trends.
 
 The drawing region can be customized, and the underlying data or model
 can optionally be revealed after the user completes their drawing.
@@ -58,9 +58,9 @@ drawit(p,
 
 ![](man/figures/drawit-example.gif)
 
-### sketchit: Freeform Drawing
+### `sketchit`: Freeform Drawing
 
-sketchit() enables more flexible interaction, allowing users to draw
+`sketchit()` enables more flexible interaction, allowing users to draw
 multiple lines without a one-to-one constraint between x and y values.
 This makes it suitable for more exploratory or open-ended tasks.
 
@@ -84,20 +84,20 @@ sketchit(p,
 
 ![](man/figures/sketchit-example.gif)
 
-### Shiny Integration
+### `Shiny` Integration
 
-Both drawit() and sketchit() can be used within Shiny applications to
-capture user input for further analysis.
+Both `drawit()` and `sketchit()` can be used within `Shiny` applications
+to capture user input for further analysis.
 
-- drawit() returns a complete mapping from x-values to user-drawn
+- `drawit()` returns a complete mapping from x-values to user-drawn
   y-values. Every x-value in the ggplot2 dataset receives a
   corresponding user-drawn value.
 
-- sketchit() returns detailed drawing data, including x and y
+- `sketchit()` returns detailed drawing data, including x and y
   coordinates of each line segment, along with attributes such as color
   and drawing order.
 
-These outputs can be accessed via Shiny inputs and used for downstream
+These outputs can be accessed via `Shiny` inputs and used for downstream
 tasks, such as comparing user predictions to model results or analyzing
 interaction behavior.
 

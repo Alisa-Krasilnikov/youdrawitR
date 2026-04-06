@@ -90,13 +90,13 @@ By default, `sketchit()` includes a palette of "steelblue", "orange", "green", a
 Note that the first color in the palette will be used as the initial drawing color.
 
 ```{r}
-(ggplot(data = penguins, aes(x = bill_length_mm, y = bill_depth_mm)) +
-  geom_point(color = "forestgreen") +
-   labs(title = "Sketchit Penguins Example",
+(ggplot(data = mtcars, aes(x = wt, y = mpg)) +
+    geom_line(size = 2) +
+    labs(title = "Sketchit Cars Example",
          subtitle = "Hope You Enjoy!",
-         x = "Bill Length (mm)",
-         y = "Bill Depth (mm)")
-    ) |> 
+         x = "Weight",
+         y = "Miles Per Gallon")
+    ) |>
   sketchit(palette = c("red", 
                        "orange", 
                        "yellow", 
@@ -110,13 +110,13 @@ Note that the first color in the palette will be used as the initial drawing col
 You can also change the initial drawing color with the `starting_color` argument. If that color is not already included in the `palette`, it will be added automatically.
 
 ```{r}
-(ggplot(data = penguins, aes(x = bill_length_mm, y = bill_depth_mm)) +
-  geom_point(color = "forestgreen") +
-   labs(title = "Sketchit Penguins Example",
+(ggplot(data = mtcars, aes(x = wt, y = mpg)) +
+    geom_smooth(method = "loess") +
+    labs(title = "Sketchit Cars Example",
          subtitle = "Hope You Enjoy!",
-         x = "Bill Length (mm)",
-         y = "Bill Depth (mm)")
-    ) |> 
+         x = "Weight",
+         y = "Miles Per Gallon")
+    ) |>
   sketchit(starting_color = "violet")
 ```
 
@@ -203,6 +203,25 @@ These behaviors can be controlled with the `max_lines` and `min_lines` arguments
 In this example, the user must draw at least two lines before clicking Done, and cannot draw more than three lines total.
 
 This can be particularly useful in `Shiny` applications or testing settings where the number of submitted sketches matters.
+
+### Shiny Integration
+
+The `sketchit()` function integrates directly with `Shiny`, enabling interactive drawing inputs to be captured and reused within reactive workflows. When used inside a `Shiny` application, `sketchit()` behaves differently than in static contexts. Instead of returning only an `r2d3` widget, it returns a list, which contains:
+
+- `youdrawit_plot`: the interactive drawing widget
+- `points`: a reactive tibble containing the user’s drawn data
+
+The `points` object is a `reactive()` expression that resolves to a `tibble` with:
+
+- `x`: user-drawn x-values
+- `y`: user-drawn y-values
+- `color`: the color of each user-drawn line
+- `order`: The chronological order in which lines were created (not accounting for undoes)
+- `line_id`: An identifier distinguishing separate lines
+
+::: {.callout-note}
+To enable communication between the browser and the Shiny server, you must supply the `shiny_message_loc` argument when using `sketchit()` in Shiny. This value must match the input ID used internally for message passing. If this argument is missing or empty, `sketchit()` will throw an error.
+:::
 
 
 

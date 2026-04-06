@@ -68,13 +68,55 @@ drawit <- function(p, ..., width = NULL, height = NULL,
                    draw_start = NULL) {
 
   if (!inherits(p, "ggplot")) {
-    stop("drawit() expects a ggplot object. Did you make sure to wrap the ggplot in ",
-         "parentheses before piping it in?")
+    stop("drawit() expects a ggplot2 object. Did you make sure to wrap the ggplot in ",
+         "parentheses before piping it in?",
+         call. = FALSE)
   }
 
   #### BEEP BEEP: Payload called here ####
   payload <- ggplot_youdrawit_payload(p)
   ########################################
+
+  ## Variable Checks --------------------------------------
+  if (!is.null(width)) {
+    if (!is.numeric(width) || length(width) != 1 || is.na(width) || width <= 0) {
+      warning("`width` must be a single positive numeric value or NULL. Input ignored.",
+              call. = FALSE)
+      width <- NULL
+    }
+  }
+
+  if (!is.null(height)) {
+    if (!is.numeric(height) || length(height) != 1 || is.na(height) || height <= 0) {
+      warning("`height` must be a single positive numeric value or NULL. Input ignored.",
+              call. = FALSE)
+      height <- NULL
+    }
+  }
+
+  if (!is.logical(show_on_finish) || length(show_on_finish) != 1 || is.na(show_on_finish)) {
+    warning("`show_on_finish` must be TRUE or FALSE. Defaulting to FALSE.",
+            call. = FALSE)
+    show_on_finish <- FALSE
+  }
+
+  if (!is.null(draw_start)) {
+    if (!is.numeric(draw_start) || length(draw_start) != 1 || is.na(draw_start)) {
+      warning("`draw_start` must be a single numeric value or NULL. Input ignored.",
+              call. = FALSE)
+      draw_start <- NULL
+    } else {
+      # Get x range from payload
+      x_range <- payload$scales$x_domain
+
+      if (draw_start < x_range[1] || draw_start > x_range[2]) {
+        warning("`draw_start` is outside the x range of the data. Input ignored.",
+                call. = FALSE)
+        draw_start <- NULL
+      }
+    }
+  }
+  ## --------------------------------------
 
   num_layers <- length(payload$layers)
 

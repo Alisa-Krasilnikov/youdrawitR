@@ -1,11 +1,13 @@
 Package: youdrawitR
 Type: Package
-Title: What the Package Does (Title Case)
+Title: 'You Draw It'
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Author: Dillon Murphy, Susan VanderPlas, Heike Hofmann, Emily Robinson, Alisa Krasilnikov
+Maintainer: Alisa Krasilnikov, Emily A. Robinson, Dillon Murphy, Susan VanderPlas, Heike Hofmann <alisa.krass@gmail.com>
+Description: ‘You Draw It’ is a feature that allows users to interact with a chart 
+directly by drawing a line on their computer screen with a mouse. Originally introduced 
+by the New York Times in 2015 for the purpose of interactive reading, this package adapts 
+the use of the 'You Draw It' method as a tool for interactive testing of graphics.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

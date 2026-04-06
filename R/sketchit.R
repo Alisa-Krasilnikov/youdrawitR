@@ -96,13 +96,99 @@ sketchit <- function(p, ..., width = NULL, height = NULL,
                    min_lines = NULL){
 
   if (!inherits(p, "ggplot")) {
-    stop("sketchit() expects a ggplot object. Did you make sure to wrap the ggplot in ",
-         "parentheses before piping it in?")
+    stop("sketchit() expects a ggplot2 object. Did you make sure to wrap the ggplot in ",
+         "parentheses before piping it in?",
+         call. = FALSE)
   }
 
   #### BEEP BEEP: Payload called here ####
   payload <- ggplot_youdrawit_payload(p)
   ########################################
+
+  ## Variable Checks --------------------------------------
+  if (!is.null(width)) {
+    if (!is.numeric(width) || length(width) != 1 || is.na(width) || width <= 0) {
+      warning("`width` must be a single positive numeric value or NULL. Input ignored.",
+              call. = FALSE)
+      width <- NULL
+    }
+  }
+
+  if (!is.null(height)) {
+    if (!is.numeric(height) || length(height) != 1 || is.na(height) || height <= 0) {
+      warning("`height` must be a single positive numeric value or NULL. Input ignored.",
+              call. = FALSE)
+      height <- NULL
+    }
+  }
+
+  if (!is.logical(color_options) || length(color_options) != 1 || is.na(color_options)) {
+    warning("`color_options` must be TRUE or FALSE. Defaulting to TRUE.",
+            call. = FALSE)
+    color_options <- TRUE
+  }
+
+  if (!is.null(starting_color)) {
+    if (!is.character(starting_color) || length(starting_color) != 1) {
+      warning("`starting_color` must be a single character string (color) or NULL. Input ignored.",
+              call. = FALSE)
+      starting_color <- NULL
+    }
+  }
+
+  if (!is.null(palette)) {
+    if (!is.character(palette) || length(palette) == 0) {
+      warning("`palette` must be a character vector of colors or NULL. Input ignored.",
+              call. = FALSE)
+      palette <- NULL
+    }
+  }
+
+  if (!is.numeric(stroke_width) || length(stroke_width) != 1 || is.na(stroke_width) || stroke_width <= 0) {
+    warning("`stroke_width` must be a single positive numeric value. Defaulting to 2.",
+            call. = FALSE)
+    stroke_width <- 2
+  }
+
+  if (!is.numeric(button_position) || length(button_position) != 2 || any(is.na(button_position))) {
+    warning("`button_position` must be a numeric vector of length 2. Defaulting to c(1, 1).",
+            call. = FALSE)
+    button_position <- c(1, 1)
+  }
+
+  # button pos checks
+  if (any(button_position < 0 | button_position > 1)) {
+    warning("`button_position` values should be between 0 and 1. Defaulting to c(1,1).",
+            call. = FALSE)
+    button_position <- c(1, 1)
+  }
+
+  if (!is.null(max_lines)) {
+    if (!is.numeric(max_lines) || length(max_lines) != 1 || is.na(max_lines) || max_lines <= 0) {
+      warning("`max_lines` must be a single positive numeric value or NULL. Input ignored.",
+              call. = FALSE)
+      max_lines <- NULL
+    }
+  }
+
+  if (!is.null(min_lines)) {
+    if (!is.numeric(min_lines) || length(min_lines) != 1 || is.na(min_lines) || min_lines < 0) {
+      warning("`min_lines` must be a single non-negative numeric value or NULL. Input ignored.",
+              call. = FALSE)
+      min_lines <- NULL
+    }
+  }
+
+  # consistency check between min_lines and max_lines
+  if (!is.null(min_lines) && !is.null(max_lines)) {
+    if (min_lines > max_lines) {
+      warning("`min_lines` cannot be greater than `max_lines`. Both inputs ignored.",
+              call. = FALSE)
+      min_lines <- NULL
+      max_lines <- NULL
+    }
+  }
+  # --------------------------------------
 
   options <- list(
     sketchit = TRUE, # Tells MultiLayer that this is sketchit
