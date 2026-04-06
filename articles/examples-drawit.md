@@ -91,13 +91,20 @@ styling information from the `ggplot` object you pass into it.
 
 ``` r
 (ggplot(data = mtcars, aes(x = wt, y = mpg)) +
-    geom_point(size = 2, color = "red") +
+    geom_line(size = 2, color = "red") +
     labs(title = "Drawit Cars Example",
          subtitle = "Hope You Enjoy!",
          x = "Weight",
-         y = "Miles Per Gallon")
-    ) |> 
+         y = "Miles Per Gallon") +
+   scale_y_continuous(limits = c(0, 32))+
+   scale_x_continuous(limits = c(1.5, 7))
+ ) |> 
   drawit()
+#> Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+#> ℹ Please use `linewidth` instead.
+#> This warning is displayed once per session.
+#> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+#> generated.
 ```
 
 ### Simulated Data Examples
@@ -153,7 +160,10 @@ continuing the pattern.
 ```
 
 Alternatively, you can reveal the full line after the user finishes
-drawing by using the `show_on_finish` argument.
+drawing by using the `show_on_finish` argument. If `show_on_finish` is
+set to `TRUE`,
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
+will use the secondary plot as the “revealed” plot.
 
 ``` r
 (ggplot(data, aes(x, ypoints)) +
@@ -168,3 +178,36 @@ drawing by using the `show_on_finish` argument.
   labs(x = "X-Label", y = "Y-Label")) |>
   drawit(draw_start = 10, show_on_finish = TRUE)
 ```
+
+### Shiny Integration
+
+The
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
+function integrates directly with `Shiny`, enabling interactive drawing
+inputs to be captured and reused within reactive workflows. When used
+inside a `Shiny` application,
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
+behaves differently than in static contexts. Instead of returning only
+an `r2d3` widget, it returns a list, which contains:
+
+- `youdrawit_plot`: the interactive drawing widget
+- `points`: a reactive tibble containing the user’s drawn data
+
+The `points` object is a `reactive()` expression that resolves to a
+`tibble` with:
+
+- `x`: original (as well as some interpolated) x-values
+- `y`: corresponding user-drawn values
+
+Because
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
+enforces a continuous, one-to-one drawing, this output represents a
+fully specified function over the draw space.
+
+To enable communication between the browser and the Shiny server, you
+must supply the `shiny_message_loc` argument when using
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
+in Shiny. This value must match the input ID used internally for message
+passing. If this argument is missing or empty,
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
+will throw an error.

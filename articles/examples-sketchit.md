@@ -104,13 +104,13 @@ Note that the first color in the palette will be used as the initial
 drawing color.
 
 ``` r
-(ggplot(data = penguins, aes(x = bill_length_mm, y = bill_depth_mm)) +
-  geom_point(color = "forestgreen") +
-   labs(title = "Sketchit Penguins Example",
+(ggplot(data = mtcars, aes(x = wt, y = mpg)) +
+    geom_line(size = 2) +
+    labs(title = "Sketchit Cars Example",
          subtitle = "Hope You Enjoy!",
-         x = "Bill Length (mm)",
-         y = "Bill Depth (mm)")
-    ) |> 
+         x = "Weight",
+         y = "Miles Per Gallon")
+    ) |>
   sketchit(palette = c("red", 
                        "orange", 
                        "yellow", 
@@ -119,6 +119,11 @@ drawing color.
                        "purple", 
                        "pink", 
                        "black"))
+#> Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+#> ℹ Please use `linewidth` instead.
+#> This warning is displayed once per session.
+#> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+#> generated.
 ```
 
 You can also change the initial drawing color with the `starting_color`
@@ -126,14 +131,15 @@ argument. If that color is not already included in the `palette`, it
 will be added automatically.
 
 ``` r
-(ggplot(data = penguins, aes(x = bill_length_mm, y = bill_depth_mm)) +
-  geom_point(color = "forestgreen") +
-   labs(title = "Sketchit Penguins Example",
+(ggplot(data = mtcars, aes(x = wt, y = mpg)) +
+    geom_smooth(method = "loess") +
+    labs(title = "Sketchit Cars Example",
          subtitle = "Hope You Enjoy!",
-         x = "Bill Length (mm)",
-         y = "Bill Depth (mm)")
-    ) |> 
+         x = "Weight",
+         y = "Miles Per Gallon")
+    ) |>
   sketchit(starting_color = "violet")
+#> `geom_smooth()` using formula = 'y ~ x'
 ```
 
 If you prefer users to draw with only one color, you can turn off the
@@ -249,3 +255,35 @@ Done, and cannot draw more than three lines total.
 
 This can be particularly useful in `Shiny` applications or testing
 settings where the number of submitted sketches matters.
+
+### Shiny Integration
+
+The
+[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md)
+function integrates directly with `Shiny`, enabling interactive drawing
+inputs to be captured and reused within reactive workflows. When used
+inside a `Shiny` application,
+[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md)
+behaves differently than in static contexts. Instead of returning only
+an `r2d3` widget, it returns a list, which contains:
+
+- `youdrawit_plot`: the interactive drawing widget
+- `points`: a reactive tibble containing the user’s drawn data
+
+The `points` object is a `reactive()` expression that resolves to a
+`tibble` with:
+
+- `x`: user-drawn x-values
+- `y`: user-drawn y-values
+- `color`: the color of each user-drawn line
+- `order`: The chronological order in which lines were created (not
+  accounting for undoes)
+- `line_id`: An identifier distinguishing separate lines
+
+To enable communication between the browser and the Shiny server, you
+must supply the `shiny_message_loc` argument when using
+[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md)
+in Shiny. This value must match the input ID used internally for message
+passing. If this argument is missing or empty,
+[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md)
+will throw an error.
