@@ -22,8 +22,8 @@ You can install the development version of youdrawitR from
 [GitHub](https://github.com/) with:
 
 ``` r
-#install.packages("devtools")
-devtools::install_github("Alisa-Krasilnikov/youdrawitR")
+#install.packages("pak")
+pak::pak("Alisa-Krasilnikov/youdrawitR")
 ```
 
 ## Usage
@@ -100,6 +100,10 @@ to capture user input for further analysis.
 These outputs can be accessed via `Shiny` inputs and used for downstream
 tasks, such as comparing user predictions to model results or analyzing
 interaction behavior.
+
+:star: This page is a minimal description of the package and its
+usability. We highly recommend looking at the **Articles** section, as
+the vignettes will have examples that go more in depth. :star:
 
 ### Status
 
