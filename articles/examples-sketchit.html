@@ -326,7 +326,7 @@ differently than in static contexts. Instead of returning only an
 <code>points</code>: a reactive tibble containing the user’s drawn
 data</li>
 </ul>
-<p>The <code>points</code> object is a <code>reactive()</code>
+<p>The <code>points</code> object is a <code><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">reactive()</a></code>
 expression that resolves to a <code>tibble</code> with:</p>
 <ul>
 <li>
@@ -342,12 +342,79 @@ created (not accounting for undoes)</li>
 <code>line_id</code>: An identifier distinguishing separate
 lines</li>
 </ul>
-<div class="callout-note">
-<p>To enable communication between the browser and the Shiny server, you
-must supply the <code>shiny_message_loc</code> argument when using
-<code><a href="../reference/sketchit.html">sketchit()</a></code> in Shiny. This value must match the input ID
-used internally for message passing. If this argument is missing or
-empty, <code><a href="../reference/sketchit.html">sketchit()</a></code> will throw an error.</p>
+<p>To enable communication between the browser and the
+<code>Shiny</code> server, you must supply the
+<code>shiny_message_loc</code> argument when using
+<code><a href="../reference/sketchit.html">sketchit()</a></code> in <code>Shiny</code>. This argument defines the
+input name used to send drawn data from the browser back to
+<code>Shiny</code>. The drawing interaction itself is handled in
+<code>JavaScript</code>, while <code>Shiny</code> runs in <code>R</code>
+on the server, so <code>shiny_message_loc</code> acts as the bridge
+between the two.</p>
+<div class="section level4">
+<h4 id="example">Example:<a class="anchor" aria-label="anchor" href="#example"></a>
+</h4>
+<p>The following example demonstrates a minimal <code>Shiny</code> app
+that captures user-drawn points and returns them as a tibble</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.posit.co/" class="external-link">shiny</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Define the User Interface (ui)</span></span>
+<span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/fluidPage.html" class="external-link">fluidPage</a></span><span class="op">(</span></span>
+<span>  <span class="co"># Placeholder for the interactive drawit widget</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/htmlOutput.html" class="external-link">uiOutput</a></span><span class="op">(</span><span class="st">"widget_ui"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Define the Server Logic</span></span>
+<span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="co"># Create a ggplot object as the base plot for drawing</span></span>
+<span>  <span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">penguins</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">bill_length_mm</span>, y <span class="op">=</span> <span class="va">bill_depth_mm</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co"># This is the "bridge" between JavaScript (browser) and Shiny (R server)</span></span>
+<span>  <span class="va">shiny_message_loc</span> <span class="op">&lt;-</span> <span class="st">"scatter_points"</span></span>
+<span>  </span>
+<span>  <span class="co"># Initialize sketchit</span></span>
+<span>   <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sketchit.html">sketchit</a></span><span class="op">(</span></span>
+<span>    <span class="va">p</span>, <span class="co"># the ggplot object</span></span>
+<span>    shiny_message_loc <span class="op">=</span> <span class="va">shiny_message_loc</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="co"># res contains:</span></span>
+<span>    <span class="co"># - youdrawit_plot: the interactive plot</span></span>
+<span>    <span class="co"># - points(): a reactive object containing the user-drawn points as a tibble</span></span>
+<span>   </span>
+<span>  <span class="co"># Render the widget in the UI placeholder</span></span>
+<span>  <span class="va">output</span><span class="op">$</span><span class="va">widget_ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderUI.html" class="external-link">renderUI</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="va">res</span><span class="op">$</span><span class="va">youdrawit_plot</span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co"># observeEvent() watches res$points(), the reactive object</span></span>
+<span>  <span class="co"># Once the user completes their drawing, res$points() is populated</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observeEvent.html" class="external-link">observeEvent</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="fu">points</span><span class="op">(</span><span class="op">)</span>, <span class="op">{</span></span>
+<span>    <span class="co"># Because points is reactive, call res$points() inside reactive code</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/stopApp.html" class="external-link">stopApp</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="fu">points</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>  <span class="co"># stops the app and outputs the tibble of points</span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span></span>
+<span><span class="co"># runApp() launches the app and returns the user-drawn points once complete</span></span>
+<span><span class="va">points</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/runApp.html" class="external-link">runApp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/shinyApp.html" class="external-link">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>After the user finishes drawing (by clicking <code>Done</code>),
+<code>res$points()</code> returns a tibble containing the recorded
+points from the user’s drawing. Each row corresponds to one captured
+point, along with information about which line it belongs to, the order
+in which it was drawn (including undoes), and the selected color. It
+might look something like this:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># A tibble: 4 x 5</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>      x     y color   order line_id</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>  <span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> <span class="er">&lt;</span>dbl<span class="sc">&gt;</span> <span class="er">&lt;</span>chr<span class="sc">&gt;</span>   <span class="er">&lt;</span>int<span class="sc">&gt;</span>   <span class="er">&lt;</span>int<span class="sc">&gt;</span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="dv">1</span>  <span class="fl">10.0</span>  <span class="fl">15.2</span> steelblue   <span class="dv">0</span>       <span class="dv">1</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="dv">2</span>  <span class="fl">10.5</span>  <span class="fl">15.4</span> steelblue   <span class="dv">0</span>       <span class="dv">1</span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="dv">3</span>  <span class="fl">11.0</span>  <span class="fl">15.8</span> red         <span class="dv">4</span>       <span class="dv">2</span></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="dv">4</span>  <span class="fl">11.5</span>  <span class="fl">16.1</span> red         <span class="dv">4</span>       <span class="dv">2</span></span></code></pre></div>
+<p>The exact number of rows will depend on the user’s drawing. The
+resulting x and y values will be on a similar scale to the original
+dataset, allowing for easy merges and comparisons.</p>
 </div>
 </div>
 </div>

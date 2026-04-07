@@ -38,19 +38,14 @@ sketch or draw on a graph.
 
 ## Examples
 
-### Real Data Examples
+### Data Connection and Smoothing
 
-Because `youdrawitR` builds on `ggplot2`, it works naturally with real
-datasets. This makes it useful when you want users to estimate or
-continue a trend they see between variables.
-
-Note:
-[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)works
-best with smaller datasets because it tries to match each x-value in the
-original data. This is especially helpful if you want to collect the
-user-drawn values and merge them back with the plotted data. If you need
-more flexibility, see
-[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md).
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
+tries to match each x-value in the original data. This is especially
+helpful if you want to collect the user-drawn values and merge them back
+with the plotted data, as it could be potentially useful to measure the
+distance from each original x-point to the user-drawn y-point. However,
+in some situations it may be useful to loosen this x-y connection.
 
 Let’s see it used with `mtcars`.
 
@@ -60,7 +55,7 @@ Let’s see it used with `mtcars`.
   drawit()
 ```
 
-The smoothness, or jitteriness, of the drawn path depends on how densely
+The smoothness or chunkiness of the drawn path depends on how densely
 packed the data are. Compare the `mtcars` example to the
 `palmerpenguins` dataset.
 
@@ -73,16 +68,41 @@ penguins_adelie <- dplyr::filter(penguins, species == "Adelie")
 ```
 
 In this example, the drawn path is much more jittery and requires more
-careful mouse movement to connect smoothly. Moving your mouse slowly
-across the plot often helps the function capture the movement more
-accurately. If jitteriness becomes a problem, consider reducing the
-density of the data or increasing the height and width when rendering.
-This often makes the interaction easier to control.
+precision in the mouse movement to connect smoothly. Moving your mouse
+slowly across the plot often helps the function capture the movement
+more accurately. If jitteriness becomes a problem, consider reducing the
+density of the data or increasing the rendered height and width of the
+plot.
+
+Another option is to use the `smoother` parameter, which often makes the
+interaction easier to control.
+
+``` r
+(ggplot(data = penguins_adelie, aes(x = bill_length_mm, y = bill_depth_mm)) +
+  geom_point()) |> 
+  drawit(smoother = 0.5)
+```
+
+Notice that the drawn line becomes smoother when the `smoother` value
+increases from 0. This happens because nearby x-values are more likely
+to be grouped together, which reduces small, jittery movements in the
+drawing. While this can make the interaction feel easier and more
+controlled, it may also reduce precision when recording user data, as
+the resulting x-values will no longer align as closely with the original
+data.
+
+Choosing an appropriate smoothing value depends on your goal. If you
+need point-by-point comparisons, a lower value is more appropriate. If
+you are more interested in the overall trend, or want to make the
+drawing experience less sensitive to small mouse movements, a higher
+value can be helpful.
 
 If you need more flexibility, check out
 [`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md).
 That function is more freeform and can be especially useful when the
 data are dense.
+
+#### `ggplot2` Connection
 
 While
 [`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
@@ -99,15 +119,24 @@ styling information from the `ggplot` object you pass into it.
    scale_y_continuous(limits = c(0, 32))+
    scale_x_continuous(limits = c(1.5, 7))
  ) |> 
-  drawit()
+  drawit(smoother = 0.2)
 ```
 
-### Simulated Data Examples
+In the example above, the line color, line width, labels, and axis
+limits are all reflected in the interactive version. However, when you
+render your ggplot, some features may not appear exactly as expected.
+`youdrawitR` is still a work in progress, so certain plot elements may
+not yet be fully supported or may render differently from the original
+`ggplot2` object.
+
+### Drawing Boundaries and Reveals
 
 [`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
-is especially useful with simulated data, since it was originally
-designed for graphical testing. The function includes several options
-that allow you to adjust the graph to fit your use case.
+is especially useful with simulated data and forecasting-style tasks,
+since it was originally designed for graphical testing. The function
+includes several arguments that let you control which parts of a plot
+are shown to the user, where drawing begins, and what is revealed after
+the interaction is complete.
 
 ``` r
 # Here is the simulated data we will be using
@@ -188,21 +217,87 @@ an `r2d3` widget, it returns a list, which contains:
 - `youdrawit_plot`: the interactive drawing widget
 - `points`: a reactive tibble containing the user’s drawn data
 
-The `points` object is a `reactive()` expression that resolves to a
-`tibble` with:
+The `points` object is a
+[`reactive()`](https://rdrr.io/pkg/shiny/man/reactive.html) expression
+that resolves to a `tibble` with:
 
-- `x`: original (as well as some interpolated) x-values
+- `x`: x-values corresponding to the draw space
 - `y`: corresponding user-drawn values
 
-Because
-[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
-enforces a continuous, one-to-one drawing, this output represents a
-fully specified function over the draw space.
-
-To enable communication between the browser and the Shiny server, you
+To enable communication between the browser and the `Shiny` server, you
 must supply the `shiny_message_loc` argument when using
 [`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
-in Shiny. This value must match the input ID used internally for message
-passing. If this argument is missing or empty,
-[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
-will throw an error.
+in `Shiny`. This argument defines the input name used to send drawn data
+from the browser back to `Shiny`. The drawing interaction itself is
+handled in `JavaScript`, while `Shiny` runs in `R` on the server, so
+`shiny_message_loc` acts as the bridge between the two.
+
+#### Example:
+
+The following example demonstrates a minimal `Shiny` app that captures
+user-drawn points and returns them as a tibble
+
+``` r
+library(shiny)
+
+# Define the User Interface (ui)
+ui <- fluidPage(
+  # Placeholder for the interactive drawit widget
+  uiOutput("widget_ui")
+)
+
+# Define the Server Logic
+server <- function(input, output, session) {
+  # Create a ggplot object as the base plot for drawing
+  p <- ggplot(data = penguins, aes(x = bill_length_mm, y = bill_depth_mm)) +
+    geom_point(size = 2)
+  
+  # This is the "bridge" between JavaScript (browser) and Shiny (R server)
+  shiny_message_loc <- "scatter_points"
+  
+  # Initialize drawit
+   res <- drawit(
+    p, # the ggplot object
+    smoother = 2,
+    shiny_message_loc = shiny_message_loc
+    )
+  # res contains:
+    # - youdrawit_plot: the interactive plot
+    # - points(): a reactive object containing the user-drawn points as a tibble
+   
+  # Render the widget in the UI placeholder
+  output$widget_ui <- renderUI({
+    res$youdrawit_plot
+  })
+  
+  # observeEvent() watches res$points(), the reactive object
+  # Once the user completes their drawing, res$points() is populated
+  observeEvent(res$points(), {
+    # Because points is reactive, call res$points() inside reactive code
+    stopApp(res$points())  # stops the app and outputs the tibble of points
+  })
+}
+
+
+# runApp() launches the app and returns the user-drawn points once complete
+points <- runApp(shinyApp(ui, server))
+```
+
+After the user finishes drawing (when the yellow box has been completely
+filled in), `res$points()` returns a tibble with one row for each
+x-value in the drawable region. It might look something like this:
+
+``` r
+# A tibble: 4 x 2
+      x     y
+  <dbl> <dbl>
+1  10.0  15.2
+2  10.5  15.4
+3  11.0  15.8
+4  11.5  16.1
+```
+
+The exact number of rows will depend on the x-values in the original
+plot and the user’s drawing. The resulting x and y values will be on a
+similar scale to the original dataset, allowing for easy merges and
+comparisons.

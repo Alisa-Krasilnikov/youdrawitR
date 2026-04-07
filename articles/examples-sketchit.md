@@ -270,8 +270,9 @@ an `r2d3` widget, it returns a list, which contains:
 - `youdrawit_plot`: the interactive drawing widget
 - `points`: a reactive tibble containing the user’s drawn data
 
-The `points` object is a `reactive()` expression that resolves to a
-`tibble` with:
+The `points` object is a
+[`reactive()`](https://rdrr.io/pkg/shiny/man/reactive.html) expression
+that resolves to a `tibble` with:
 
 - `x`: user-drawn x-values
 - `y`: user-drawn y-values
@@ -280,10 +281,80 @@ The `points` object is a `reactive()` expression that resolves to a
   accounting for undoes)
 - `line_id`: An identifier distinguishing separate lines
 
-To enable communication between the browser and the Shiny server, you
+To enable communication between the browser and the `Shiny` server, you
 must supply the `shiny_message_loc` argument when using
 [`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md)
-in Shiny. This value must match the input ID used internally for message
-passing. If this argument is missing or empty,
-[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md)
-will throw an error.
+in `Shiny`. This argument defines the input name used to send drawn data
+from the browser back to `Shiny`. The drawing interaction itself is
+handled in `JavaScript`, while `Shiny` runs in `R` on the server, so
+`shiny_message_loc` acts as the bridge between the two.
+
+#### Example:
+
+The following example demonstrates a minimal `Shiny` app that captures
+user-drawn points and returns them as a tibble
+
+``` r
+library(shiny)
+
+# Define the User Interface (ui)
+ui <- fluidPage(
+  # Placeholder for the interactive drawit widget
+  uiOutput("widget_ui")
+)
+
+# Define the Server Logic
+server <- function(input, output, session) {
+  # Create a ggplot object as the base plot for drawing
+  p <- ggplot(data = penguins, aes(x = bill_length_mm, y = bill_depth_mm)) +
+    geom_point(size = 2)
+  
+  # This is the "bridge" between JavaScript (browser) and Shiny (R server)
+  shiny_message_loc <- "scatter_points"
+  
+  # Initialize sketchit
+   res <- sketchit(
+    p, # the ggplot object
+    shiny_message_loc = shiny_message_loc
+    )
+  # res contains:
+    # - youdrawit_plot: the interactive plot
+    # - points(): a reactive object containing the user-drawn points as a tibble
+   
+  # Render the widget in the UI placeholder
+  output$widget_ui <- renderUI({
+    res$youdrawit_plot
+  })
+  
+  # observeEvent() watches res$points(), the reactive object
+  # Once the user completes their drawing, res$points() is populated
+  observeEvent(res$points(), {
+    # Because points is reactive, call res$points() inside reactive code
+    stopApp(res$points())  # stops the app and outputs the tibble of points
+  })
+}
+
+
+# runApp() launches the app and returns the user-drawn points once complete
+points <- runApp(shinyApp(ui, server))
+```
+
+After the user finishes drawing (by clicking `Done`), `res$points()`
+returns a tibble containing the recorded points from the user’s drawing.
+Each row corresponds to one captured point, along with information about
+which line it belongs to, the order in which it was drawn (including
+undoes), and the selected color. It might look something like this:
+
+``` r
+# A tibble: 4 x 5
+      x     y color   order line_id
+  <dbl> <dbl> <chr>   <int>   <int>
+1  10.0  15.2 steelblue   0       1
+2  10.5  15.4 steelblue   0       1
+3  11.0  15.8 red         4       2
+4  11.5  16.1 red         4       2
+```
+
+The exact number of rows will depend on the user’s drawing. The
+resulting x and y values will be on a similar scale to the original
+dataset, allowing for easy merges and comparisons.
