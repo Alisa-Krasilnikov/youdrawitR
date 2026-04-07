@@ -91,9 +91,9 @@ can be used within `Shiny` applications to capture user input for
 further analysis.
 
 - [`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
-  returns a complete mapping from x-values to user-drawn y-values. Every
-  x-value in the ggplot2 dataset receives a corresponding user-drawn
-  value.
+  returns user-drawn y-values aligned to the original x-values in the
+  `ggplot2` dataset, preserving the source data structure as closely as
+  possible while permitting minor smoothing.
 
 - [`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md)
   returns detailed drawing data, including x and y coordinates of each

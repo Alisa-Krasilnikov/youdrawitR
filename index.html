@@ -128,7 +128,7 @@
 </h3>
 <p>Both <code><a href="reference/drawit.html">drawit()</a></code> and <code><a href="reference/sketchit.html">sketchit()</a></code> can be used within <code>Shiny</code> applications to capture user input for further analysis.</p>
 <ul>
-<li><p><code><a href="reference/drawit.html">drawit()</a></code> returns a complete mapping from x-values to user-drawn y-values. Every x-value in the ggplot2 dataset receives a corresponding user-drawn value.</p></li>
+<li><p><code><a href="reference/drawit.html">drawit()</a></code> returns user-drawn y-values aligned to the original x-values in the <code>ggplot2</code> dataset, preserving the source data structure as closely as possible while permitting minor smoothing.</p></li>
 <li><p><code><a href="reference/sketchit.html">sketchit()</a></code> returns detailed drawing data, including x and y coordinates of each line segment, along with attributes such as color and drawing order.</p></li>
 </ul>
 <p>These outputs can be accessed via <code>Shiny</code> inputs and used for downstream tasks, such as comparing user predictions to model results or analyzing interaction behavior.</p>

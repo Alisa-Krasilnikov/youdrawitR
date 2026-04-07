@@ -15,7 +15,8 @@ drawit(
   height = NULL,
   shiny_message_loc = NULL,
   show_on_finish = FALSE,
-  draw_start = NULL
+  draw_start = NULL,
+  smoother = 0.001
 )
 ```
 
@@ -51,6 +52,14 @@ drawit(
 
   Specifies where drawing interaction begins, on the scale of your data.
 
+- smoother:
+
+  A number greater than 0 that controls how much nearby x-values are
+  binned together. Larger values group more points, creating a smoother
+  but less detailed drawing (useful for dense data). Values closer to 0
+  keep points more separate, preserving detail (useful when the exact
+  x-y relationship matters)
+
 ## Value
 
 An `r2d3` htmlwidget.
@@ -80,8 +89,8 @@ corresponding user-drawn y-value.
 
 The returned data includes:
 
-- `x`: The x-values from the original data, along with additional
-  interpolated points used to ensure smooth drawing
+- `x`: The x-values drawn by the user, preserving the original data as
+  much as possible
 
 - `y`: The user-drawn y-values corresponding to each x
 

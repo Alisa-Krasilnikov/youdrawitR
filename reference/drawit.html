@@ -55,7 +55,8 @@ estimate trends or sketch expected relationships in the data.</p>
 <span>  height <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  shiny_message_loc <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  show_on_finish <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  draw_start <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  draw_start <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  smoother <span class="op">=</span> <span class="fl">0.001</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -90,6 +91,10 @@ estimate trends or sketch expected relationships in the data.</p>
 <dt id="arg-draw-start">draw_start<a class="anchor" aria-label="anchor" href="#arg-draw-start"></a></dt>
 <dd><p>Specifies where drawing interaction begins, on the scale of your data.</p></dd>
 
+
+<dt id="arg-smoother">smoother<a class="anchor" aria-label="anchor" href="#arg-smoother"></a></dt>
+<dd><p>A number greater than 0 that controls how much nearby x-values are binned together. Larger values group more points, creating a smoother but less detailed drawing (useful for dense data). Values closer to 0 keep points more separate, preserving detail (useful when the exact x-y relationship matters)</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -116,8 +121,7 @@ recorded drawing data as a structured object once the user has filled
 the drawable region. Each x-value in the original data is paired with
 a corresponding user-drawn y-value.</p>
 <p>The returned data includes:</p>
-<ul><li><p><code>x</code>: The x-values from the original data, along with
-additional interpolated points used to ensure smooth drawing</p></li>
+<ul><li><p><code>x</code>: The x-values drawn by the user, preserving the original data as much as possible</p></li>
 <li><p><code>y</code>: The user-drawn y-values corresponding to each x</p></li>
 </ul><p>Because <code>drawit()</code> enforces a single continuous line, the output
 represents a fully specified function over the domain of the data.</p>
