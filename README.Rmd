@@ -28,8 +28,8 @@ knitr::opts_chunk$set(
 You can install the development version of youdrawitR from [GitHub](https://github.com/) with:
 
 ```{r, message=FALSE}
-#install.packages("devtools")
-devtools::install_github("Alisa-Krasilnikov/youdrawitR")
+#install.packages("pak")
+pak::pak("Alisa-Krasilnikov/youdrawitR")
 ```
 
 ## Usage
@@ -88,6 +88,8 @@ Both `drawit()` and `sketchit()` can be used within `Shiny` applications to capt
 - `sketchit()` returns detailed drawing data, including x and y coordinates of each line segment, along with attributes such as color and drawing order.
 
 These outputs can be accessed via `Shiny` inputs and used for downstream tasks, such as comparing user predictions to model results or analyzing interaction behavior.
+
+:star: This page is a minimal description of the package and its usability. We highly recommend looking at the **Articles** section, as the vignettes will have examples that go more in depth. :star:
 
 ### Status
 

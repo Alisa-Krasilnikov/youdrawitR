@@ -153,10 +153,11 @@
     // copy so we don’t change the original data
     const sorted = raw.slice().sort((a, b) => a.x - b.x);
 
+    const smoother = state.smoother ?? 1;
     // After sorting, deduplicate near-identical x values -------
     const domain_range = sorted[sorted.length - 1].x - sorted[0].x; // Figure out how spread out the x values are in total
-    const DEDUP_EPS = (domain_range / sorted.length) * 0.001; // Divide that range evenly across all points to get a share per point
-    //take 0.1% of that as our closeness threshold, anything closer than that gets treated as same x value
+    const DEDUP_EPS = (domain_range / sorted.length) * smoother; // Divide that range evenly across all points to get a share per point
+    //take that as our closeness threshold, anything closer than that gets treated as same x value
     const deduped = [];
     let group = [sorted[0]];
 
@@ -484,6 +485,7 @@
     state.line_data = rowsFrom(data); // Adjusted because of the gapping issue
     options = options || {};
     state.x_domain = options.x_domain || null;
+    state.smoother = options.smoother;
     state.pin_start = !!options.pin_start;
     state.draw_start = options.draw_start != null
       ? +options.draw_start
