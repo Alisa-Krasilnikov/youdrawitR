@@ -11,7 +11,8 @@ drawit(
   height = NULL,
   shiny_message_loc = NULL,
   show_on_finish = FALSE,
-  draw_start = NULL
+  draw_start = NULL,
+  smoother = 0.001
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ drawit(
 \item{show_on_finish}{If \code{TRUE}, displays a secondary geom after the user finishes drawing. Note that this will always be the second geom layer within your \code{ggplot2} object.}
 
 \item{draw_start}{Specifies where drawing interaction begins, on the scale of your data.}
+
+\item{smoother}{A number greater than 0 that controls how much nearby x-values are binned together. Larger values group more points, creating a smoother but less detailed drawing (useful for dense data). Values closer to 0 keep points more separate, preserving detail (useful when the exact x-y relationship matters)}
 }
 \value{
 An \code{r2d3} htmlwidget.
@@ -61,8 +64,7 @@ a corresponding user-drawn y-value.
 The returned data includes:
 
 \itemize{
-\item \code{x}: The x-values from the original data, along with
-additional interpolated points used to ensure smooth drawing
+\item \code{x}: The x-values drawn by the user, preserving the original data as much as possible
 \item \code{y}: The user-drawn y-values corresponding to each x
 }
 
