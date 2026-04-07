@@ -89,9 +89,9 @@ sketchit(p,
 Both `drawit()` and `sketchit()` can be used within `Shiny` applications
 to capture user input for further analysis.
 
-- `drawit()` returns a complete mapping from x-values to user-drawn
-  y-values. Every x-value in the ggplot2 dataset receives a
-  corresponding user-drawn value.
+- `drawit()` returns user-drawn y-values aligned to the original
+  x-values in the `ggplot2` dataset, preserving the source data
+  structure as closely as possible while permitting minor smoothing.
 
 - `sketchit()` returns detailed drawing data, including x and y
   coordinates of each line segment, along with attributes such as color
