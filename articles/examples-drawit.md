@@ -38,7 +38,7 @@ sketch or draw on a graph.
 
 ## Examples
 
-### Data Connection and Smoothing
+### Data Connection and Drawing Behavior
 
 [`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit%202.html)
 tries to match each x-value in the original data. This is especially
@@ -91,11 +91,31 @@ controlled, it may also reduce precision when recording user data, as
 the resulting x-values will no longer align as closely with the original
 data.
 
-Choosing an appropriate smoothing value depends on your goal. If you
-need point-by-point comparisons, a lower value is more appropriate. If
-you are more interested in the overall trend, or want to make the
-drawing experience less sensitive to small mouse movements, a higher
-value can be helpful.
+Alternatively, if you’d prefer more intermediate points, you could
+decrease the `interpolator` value. This value acts as the minimum
+spacing between points. whenever gaps are larger than this value,
+additional interpolated points are inserted. This can often make the
+drawing much smoother, though it may add a large amount of superfluous
+rows to the resulting user-interaction datasets.
+
+``` r
+(ggplot(data = mtcars, aes(x = wt, y = mpg)) +
+  geom_point()) |> 
+  drawit(interpolator = 0.05)
+```
+
+This setting can also produce a jittery result, similar to the penguins
+example, because it creates many “pseudo-points” between the original
+observations.
+
+Choosing appropriate `smoother` and `interpolator` values depends on
+your goal. If you need point-by-point comparisons, a lower value for the
+`smoother` is more appropriate. If you are more interested in the
+overall trend, or want to make the drawing experience less sensitive to
+small mouse movements, a higher value can be helpful. The `interpolator`
+affects how many intermediate points are inserted between observed
+values, which can improve visual continuity but may also increase the
+size of the captured dataset.
 
 If you need more flexibility, check out
 [`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit%202.html).
