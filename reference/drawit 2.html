@@ -39,7 +39,7 @@ estimate trends or sketch expected relationships in the data."><meta property="o
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Interactive drawing on <code>ggplot2</code> visualizations using D3</h1>
       <small class="dont-index">Source: <a href="https://github.com/Alisa-Krasilnikov/youdrawitR/blob/main/R/drawit.R" class="external-link"><code>R/drawit.R</code></a></small>
-      <div class="d-none name"><code>drawit.Rd</code></div>
+      <div class="d-none name"><code>drawit 2.Rd</code></div>
     </div>
 
     <div class="ref-description section level2">
@@ -58,7 +58,8 @@ estimate trends or sketch expected relationships in the data.</p>
 <span>  shiny_message_loc <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  show_on_finish <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  draw_start <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  smoother <span class="op">=</span> <span class="fl">0.001</span></span>
+<span>  smoother <span class="op">=</span> <span class="fl">0.001</span>,</span>
+<span>  interpolator <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -96,6 +97,10 @@ estimate trends or sketch expected relationships in the data.</p>
 
 <dt id="arg-smoother">smoother<a class="anchor" aria-label="anchor" href="#arg-smoother"></a></dt>
 <dd><p>A number greater than 0 that controls how much nearby x-values are binned together. Larger values group more points, creating a smoother but less detailed drawing (useful for dense data). Values closer to 0 keep points more separate, preserving detail (useful when the exact x-y relationship matters)</p></dd>
+
+
+<dt id="arg-interpolator">interpolator<a class="anchor" aria-label="anchor" href="#arg-interpolator"></a></dt>
+<dd><p>A number greater than 0 that controls how may "in between" x-values are added to gaps between data. Values closer to zero indicate that the function is looking for smaller gaps, thus filling in more points. Higher values avoid adding interpolated points, making the drawing "chunkier."</p></dd>
 
 </dl></div>
     <div class="section level2">
