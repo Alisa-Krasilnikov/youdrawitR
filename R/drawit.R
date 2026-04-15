@@ -13,6 +13,7 @@
 #' @param show_on_finish If \code{TRUE}, displays a secondary geom after the user finishes drawing. Note that this will always be the second geom layer within your \code{ggplot2} object.
 #' @param draw_start Specifies where drawing interaction begins, on the scale of your data.
 #' @param smoother A number greater than 0 that controls how much nearby x-values are binned together. Larger values group more points, creating a smoother but less detailed drawing (useful for dense data). Values closer to 0 keep points more separate, preserving detail (useful when the exact x-y relationship matters)
+#' @param interpolator A number greater than 0 that controls how may "in between" x-values are added to gaps between data. Values closer to zero indicate that the function is looking for smaller gaps, thus filling in more points. Higher values avoid adding interpolated points, making the drawing "chunkier."
 #'
 #' @details
 #' For more flexible, free-form drawing, see \code{sketchit()}.
@@ -65,7 +66,7 @@
 
 drawit <- function(p, ..., width = NULL, height = NULL,
                    shiny_message_loc = NULL, show_on_finish = FALSE,
-                   draw_start = NULL, smoother = 0.001) {
+                   draw_start = NULL, smoother = 0.001, interpolator = NULL) {
 
   if (!inherits(p, "ggplot")) {
     stop("drawit() expects a ggplot2 object. Did you make sure to wrap the ggplot in ",
@@ -98,6 +99,14 @@ drawit <- function(p, ..., width = NULL, height = NULL,
     warning("`smoother` must a value greater than 0. Defaulting to 1",
             call. = FALSE)
     smoother <- 1
+  }
+
+  if (!is.null(interpolator)) {
+    if (!is.numeric(interpolator) || length(interpolator) != 1 || is.na(interpolator) || interpolator <= 0) {
+      warning("`interpolator` must a value greater than 0 or NULL. Input ignored.",
+              call. = FALSE)
+      interpolator <- NULL
+    }
   }
 
   if (!is.logical(show_on_finish) || length(show_on_finish) != 1 || is.na(show_on_finish)) {

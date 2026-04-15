@@ -209,9 +209,16 @@
     // Allow gaps up to twice the normal spacing
     // Bigger gaps will be filled in
     const maxGap = medianGap * 2;
+    const interpolator = state.interpolator ?? null;
 
     // Fill in large gaps with extra points, see interpolate_gaps function
-    let interpolated = interpolate_gaps(deduped, maxGap);
+    let interpolated;
+    if (interpolator) {
+      interpolated = interpolate_gaps(deduped, interpolator);
+    }
+    else {
+      interpolated = interpolate_gaps(deduped, maxGap);
+    }
 
     if (!interpolated.length) { // Interpolation failed or empty
       interpolated = deduped;
@@ -486,6 +493,7 @@
     options = options || {};
     state.x_domain = options.x_domain || null;
     state.smoother = options.smoother;
+    state.interpolator = options.interpolator || null;
     state.pin_start = !!options.pin_start;
     state.draw_start = options.draw_start != null
       ? +options.draw_start
