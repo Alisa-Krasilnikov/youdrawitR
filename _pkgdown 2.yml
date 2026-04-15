@@ -1,0 +1,18 @@
+url: https://alisa-krasilnikov.github.io/youdrawitR/
+template:
+  bootstrap: 5
+  bootswatch: lumen
+  logo: man/figures/logo.png
+
+reference:
+- title: All functions
+  desc: >
+    The youdrawitR package provides tools for creating interactive “You Draw It”
+    visualizations using ggplot2 and D3. Users can convert static plots into
+    interactive graphics, draw trends, and generate data through direct interaction.
+    The package supports both guided drawing through drawit() and flexible,
+    free-form drawing through sketchit().
+  contents:
+  - drawit
+  - sketchit
+  - ggplot_youdrawit_payload

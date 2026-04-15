@@ -1,0 +1,94 @@
+---
+title: "testing_document"
+format: html
+editor: visual
+---
+
+```{r}
+library(ggplot2)
+library(svglite)
+library(r2d3)
+library(tibble)
+library(jsonlite)
+library(youdrawitR)
+library(tidyverse)
+library(dplyr)
+
+```
+
+```{r}
+data = tibble(x = seq(1, 25, .5), 
+              y = exp((x-15)/30),
+              ypoints = exp(((x-15)/30) + rnorm(30, 0, 0.1)))
+data$Group <- sample(c("Group_1", "Group_2", "Group_3"),
+                     size = nrow(data),
+                     replace = TRUE)
+```
+
+```{r}
+ggplot(data, aes(x, ypoints)) +
+  geom_point(size = 2, colour = "magenta") +
+  labs(x = "X-Label", y = "Y-Label")
+```
+
+```{r}
+(ggplot(data = penguins, aes(x = bill_length_mm, y = bill_depth_mm)) +
+  geom_point(size = 2)) |> 
+  drawit(smoother = 2)
+```
+
+```{r}
+(ggplot(data = mtcars, aes(x = mpg, y = wt)) +
+  geom_point(size = 2)) |> 
+  drawit(interpolator = 0.5)
+```
+
+```{r}
+p <-data |> 
+  filter(x <= 10) |> 
+  ggplot(aes(x = x, y = ypoints)) + 
+  geom_point(size = 2, colour = "magenta") + 
+  scale_x_continuous(limits = c(1, 20)) +
+  scale_y_continuous(limits = c(0.5, 2))+
+  labs(x = "X-Label", y = "Y-Label")
+
+drawit(p, draw_start = 10)
+```
+
+```{r}
+
+
+(ggplot(data, aes(x, ypoints)) +
+  geom_point(data = data |>  mutate(ypoints2 = ifelse(x < 10, ypoints, NA)),
+             aes(y = ypoints2),
+             size = 2, 
+             colour = "magenta"
+             ) +
+  geom_line(data = data |>  mutate(y = ifelse(x < 10, y, NA)),
+            aes(y = y)) +
+  labs(x = "X-Label", y = "Y-Label")) |>
+  drawit(show_on_finish = TRUE)
+```
+
+```{r}
+library(dplyr)
+
+df <- full_join(points, mtcars, by = c("x" = "wt"))
+df
+```
+
+```{r}
+df
+```
+
+```{r, warning=FALSE}
+ggplot(data = df)+
+  geom_line(aes(x = x, y = y)) +
+  geom_point(aes(x = x, y = mpg))
+```
+
+```{r}
+ggplot(data = df)+
+  geom_line(aes(x = x, y = y)) +
+  geom_point(aes(x = x, y = mpg))
+```
