@@ -12,7 +12,8 @@ drawit(
   shiny_message_loc = NULL,
   show_on_finish = FALSE,
   draw_start = NULL,
-  smoother = 0.001
+  smoother = 0.001,
+  interpolator = NULL
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ drawit(
 \item{draw_start}{Specifies where drawing interaction begins, on the scale of your data.}
 
 \item{smoother}{A number greater than 0 that controls how much nearby x-values are binned together. Larger values group more points, creating a smoother but less detailed drawing (useful for dense data). Values closer to 0 keep points more separate, preserving detail (useful when the exact x-y relationship matters)}
+
+\item{interpolator}{A number greater than 0 that controls how may "in between" x-values are added to gaps between data. Values closer to zero indicate that the function is looking for smaller gaps, thus filling in more points. Higher values avoid adding interpolated points, making the drawing "chunkier."}
 }
 \value{
 An \code{r2d3} htmlwidget.
