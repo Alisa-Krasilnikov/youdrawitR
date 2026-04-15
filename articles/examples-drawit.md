@@ -6,7 +6,7 @@ library(youdrawitR)
 
 ## Introduction
 
-[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit%202.html)
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
 is designed to mimic the New York Times “You Draw It” tool, where
 viewers are shown part of a graph and asked to predict the trend before
 the full data is revealed. Earlier versions of the `youdrawitR` package
@@ -14,7 +14,7 @@ required users to work with JavaScript and D3. This version only
 requires familiarity with ggplot2.
 
 In this vignette, we will demonstrate the
-[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit%202.html)
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
 tool under a variety of circumstances, using both real and simulated
 data. Although this package was originally created for graphical
 testing, it can be used more broadly in any setting where users want to
@@ -28,7 +28,7 @@ sketch or draw on a graph.
   - geom_smooth
   - geom_line
 - Then, pass that plot into
-  [`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit%202.html),
+  [`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md),
   either with a pipeline or by saving it as an object first
 - The output will display a graph with a yellow box. Click inside the
   box and move from left to right to draw your prediction. As you move,
@@ -40,7 +40,7 @@ sketch or draw on a graph.
 
 ### Data Connection and Drawing Behavior
 
-[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit%202.html)
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
 tries to match each x-value in the original data. This is especially
 helpful if you want to collect the user-drawn values and merge them back
 with the plotted data, as it could be potentially useful to measure the
@@ -118,14 +118,14 @@ values, which can improve visual continuity but may also increase the
 size of the captured dataset.
 
 If you need more flexibility, check out
-[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit%202.html).
+[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md).
 That function is more freeform and can be especially useful when the
 data are dense.
 
 #### `ggplot2` Connection
 
 While
-[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit%202.html)
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
 is not a perfect replica of `ggplot2`, it does preserve much of the
 styling information from the `ggplot` object you pass into it.
 
@@ -151,7 +151,7 @@ not yet be fully supported or may render differently from the original
 
 ### Drawing Boundaries and Reveals
 
-[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit%202.html)
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
 is especially useful with simulated data and forecasting-style tasks,
 since it was originally designed for graphical testing. The function
 includes several arguments that let you control which parts of a plot
@@ -170,7 +170,7 @@ data = tibble(x = seq(1, 25, .5),
 Often, it is helpful to ask users to continue the trend beyond the
 observed data. You can control where the drawing region begins with the
 `draw_start` argument in
-[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit%202.html).
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md).
 
 ``` r
 (ggplot(data, aes(x, ypoints)) +
@@ -184,7 +184,7 @@ observed data. You can control where the drawing region begins with the
   drawit(draw_start = 10)
 ```
 
-[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit%202.html)
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
 supports up to two geoms at a time. For example, you can include the
 true line up to the starting point so the user has a guide before
 continuing the pattern.
@@ -206,7 +206,7 @@ continuing the pattern.
 Alternatively, you can reveal the full line after the user finishes
 drawing by using the `show_on_finish` argument. If `show_on_finish` is
 set to `TRUE`,
-[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit%202.html)
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
 will use the secondary plot as the “revealed” plot.
 
 ``` r
@@ -226,11 +226,11 @@ will use the secondary plot as the “revealed” plot.
 ### Shiny Integration
 
 The
-[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit%202.html)
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
 function integrates directly with `Shiny`, enabling interactive drawing
 inputs to be captured and reused within reactive workflows. When used
 inside a `Shiny` application,
-[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit%202.html)
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
 behaves differently than in static contexts. Instead of returning only
 an `r2d3` widget, it returns a list, which contains:
 
@@ -246,7 +246,7 @@ that resolves to a `tibble` with:
 
 To enable communication between the browser and the `Shiny` server, you
 must supply the `shiny_message_loc` argument when using
-[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit%202.html)
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
 in `Shiny`. This argument defines the input name used to send drawn data
 from the browser back to `Shiny`. The drawing interaction itself is
 handled in `JavaScript`, while `Shiny` runs in `R` on the server, so

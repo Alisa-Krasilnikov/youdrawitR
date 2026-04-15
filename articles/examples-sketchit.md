@@ -6,15 +6,15 @@ library(youdrawitR)
 
 ## Introduction
 
-[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit%202.html)
+[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md)
 is designed to give users a more freeform drawing experience. Unlike
-[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit%202.html),
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md),
 it does not require a one-to-one match between the drawing and the
 underlying data. Users can draw multiple lines, and the number of lines
 can be controlled within the function.
 
 In this vignette, we demonstrate
-[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit%202.html)
+[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md)
 in a variety of settings and highlight several options for customizing
 the user experience.
 
@@ -26,7 +26,7 @@ the user experience.
   - geom_smooth
   - geom_line
 - Then, pass that plot into
-  [`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit%202.html),
+  [`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md),
   either with a pipeline or by saving it as an object first
 - The output will display a graph with drawing controls. Click and drag
   inside the plot area to draw a line. Release your mouse to finish that
@@ -38,9 +38,9 @@ the user experience.
 
 ## Examples
 
-[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit%202.html)
+[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md)
 does not have the same data-matching requirements as
-[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit%202.html),
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md),
 so it works well with a wide range of datasets.
 
 Let’s start with a high-density dataset such as `palmerpenguins`.
@@ -60,17 +60,17 @@ Now compare that to a lower-density dataset such as `mtcars`.
 ```
 
 One advantage of
-[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit%202.html)
+[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md)
 is that the drawing experience remains largely the same regardless of
 how dense the original data are. In contrast to
-[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit%202.html),
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md),
 the user is sketching freely rather than drawing a value for each
 x-position. This also means that the output does not necessarily contain
 a user-drawn y-value for every x-value in the data.
 
 Like
-[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit%202.html),
-[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit%202.html)
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md),
+[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md)
 is not a perfect replica of `ggplot2`. However, it does preserve much of
 the styling information from the `ggplot` object passed into it.
 
@@ -88,14 +88,14 @@ the styling information from the `ggplot` object passed into it.
 ### Aesthetic Customization
 
 One of the strengths of
-[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit%202.html)
+[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md)
 is that it allows for a variety of visual customizations that can change
 the overall drawing experience.
 
 #### Color Options
 
 By default,
-[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit%202.html)
+[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md)
 includes a palette of “steelblue”, “orange”, “green”, and “red”. You can
 replace this palette by supplying your own values to the palette
 argument.
@@ -160,8 +160,8 @@ especially well in combination with `starting_color`.
 ### Multiple Geoms
 
 Unlike
-[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit%202.html),
-[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit%202.html)
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md),
+[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md)
 is not limited to two geoms. Any combination of the supported geoms can
 be included in the same plot. However, all layers are displayed
 immediately. There is currently no way to delay the rendering of
@@ -230,7 +230,7 @@ plot.
 #### Controlling the Number of Lines
 
 When using
-[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit%202.html)
+[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md)
 for graphical testing or structured input tasks, it may be useful to
 limit the number of lines a user can draw. In other cases, you may want
 to require a minimum number of lines before the user is allowed to click
@@ -259,11 +259,11 @@ settings where the number of submitted sketches matters.
 ### Shiny Integration
 
 The
-[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit%202.html)
+[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md)
 function integrates directly with `Shiny`, enabling interactive drawing
 inputs to be captured and reused within reactive workflows. When used
 inside a `Shiny` application,
-[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit%202.html)
+[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md)
 behaves differently than in static contexts. Instead of returning only
 an `r2d3` widget, it returns a list, which contains:
 
@@ -283,7 +283,7 @@ that resolves to a `tibble` with:
 
 To enable communication between the browser and the `Shiny` server, you
 must supply the `shiny_message_loc` argument when using
-[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit%202.html)
+[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md)
 in `Shiny`. This argument defines the input name used to send drawn data
 from the browser back to `Shiny`. The drawing interaction itself is
 handled in `JavaScript`, while `Shiny` runs in `R` on the server, so

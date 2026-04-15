@@ -22,14 +22,14 @@ pak::pak("Alisa-Krasilnikov/youdrawitR")
 
 Both functions can be used with `geom_point`, `geom_smooth`, and
 `geom_line.` Note that
-[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit%202.html)
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
 can only be used with two `geoms` at a time, while
-[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit%202.html)
+[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md)
 supports multiple layers without restrictions.
 
 ### `drawit`: Guided Drawing
 
-[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit%202.html)
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
 allows users to draw a single continuous line across the plot, enforcing
 a one-to-one mapping between x-values and user-drawn y-values. This is
 particularly useful for assessing how users estimate regression lines or
@@ -56,7 +56,7 @@ drawit(p,
 
 ### `sketchit`: Freeform Drawing
 
-[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit%202.html)
+[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md)
 enables more flexible interaction, allowing users to draw multiple lines
 without a one-to-one constraint between x and y values. This makes it
 suitable for more exploratory or open-ended tasks.
@@ -84,18 +84,18 @@ sketchit(p,
 ### `Shiny` Integration
 
 Both
-[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit%202.html)
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
 and
-[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit%202.html)
+[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md)
 can be used within `Shiny` applications to capture user input for
 further analysis.
 
-- [`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit%202.html)
+- [`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
   returns user-drawn y-values aligned to the original x-values in the
   `ggplot2` dataset, preserving the source data structure as closely as
   possible while permitting minor smoothing.
 
-- [`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit%202.html)
+- [`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md)
   returns detailed drawing data, including x and y coordinates of each
   line segment, along with attributes such as color and drawing order.
 
@@ -142,10 +142,6 @@ and flexible, free-form drawing through sketchit().
 ### All vignettes
 
 - [Examples:
-  drawit()](https://alisa-krasilnikov.github.io/youdrawitR/articles/examples-drawit%202.md):
-- [Examples:
   drawit()](https://alisa-krasilnikov.github.io/youdrawitR/articles/examples-drawit.md):
-- [Examples:
-  sketchit()](https://alisa-krasilnikov.github.io/youdrawitR/articles/examples-sketchit%202.md):
 - [Examples:
   sketchit()](https://alisa-krasilnikov.github.io/youdrawitR/articles/examples-sketchit.md):

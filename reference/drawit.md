@@ -67,7 +67,7 @@ An `r2d3` htmlwidget.
 ## Details
 
 For more flexible, free-form drawing, see
-[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit%202.html).
+[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md).
 
 Currently, drawit can support `geom_scatter`, `geom_line`, and
 `geom_smooth`, with a maximum of two geoms per plot.
@@ -94,10 +94,8 @@ The returned data includes:
 
 - `y`: The user-drawn y-values corresponding to each x
 
-Because
-[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit%202.html)
-enforces a single continuous line, the output represents a fully
-specified function over the domain of the data.
+Because `drawit()` enforces a single continuous line, the output
+represents a fully specified function over the domain of the data.
 
 ## Examples
 

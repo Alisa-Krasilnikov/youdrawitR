@@ -2,10 +2,9 @@
 
 The sketchit function enables flexible, free-form drawing on a ggplot2
 visualization. Unlike
-[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit%202.html),
-which restricts users to a single continuous line,
-[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit%202.html)
-allows multiple lines, color selection, and greater control over drawing
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md),
+which restricts users to a single continuous line, `sketchit()` allows
+multiple lines, color selection, and greater control over drawing
 behavior. This makes it suitable for exploratory tasks, annotation, or
 situations where users may wish to sketch multiple patterns or highlight
 different features of the data.

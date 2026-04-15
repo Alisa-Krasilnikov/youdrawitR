@@ -32,9 +32,9 @@ meaning that all transformations have already been applied.
 
 The resulting structure is used as the input payload for downstream
 rendering functions such as
-[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit%202.html)
+[`drawit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/drawit.md)
 and
-[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit%202.html).
+[`sketchit()`](https://alisa-krasilnikov.github.io/youdrawitR/reference/sketchit.md).
 
 ## Examples
 
