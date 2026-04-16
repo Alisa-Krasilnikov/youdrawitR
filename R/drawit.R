@@ -173,7 +173,8 @@ drawit <- function(p, ..., width = NULL, height = NULL,
     drawit = TRUE, # Tells MultiLayer that this is drawit
     shiny_message_loc = shiny_message_loc,
     draw_start = draw_start,
-    smoother = smoother
+    smoother = smoother,
+    interpolator = interpolator
   )
 
   # Dynamically determine which JavaScript files to load
