@@ -18,7 +18,7 @@ const titleBlockHeight =
 const margin = {
   top: 20 + titleBlockHeight,
   right: 20,
-  bottom: 45,
+  bottom: 55,
   left: 55
 };
 
@@ -69,7 +69,7 @@ if (labels.x) {
   g.append("text")
     .attr("class", "x-label")
     .attr("x", innerW / 2)
-    .attr("y", innerH + 40)
+    .attr("y", innerH + 45)
     .attr("text-anchor", "middle")
     .style("font-size", "12px") // Make em smaller
     .style("font-family", "sans-serif") // Looks like ggplot
