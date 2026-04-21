@@ -3,6 +3,7 @@ window.renderLineLayer = function(svg, plot, layer) {
   const g = plot.g;
   const x = plot.x;
   const y = plot.y;
+  const alphaDefault = layer.aes_params?.alpha ?? 1;
 
   // Normalize data
   function asRows(x) {
@@ -42,6 +43,7 @@ window.renderLineLayer = function(svg, plot, layer) {
     .attr("class", "geom-line")
     .attr("fill", "none")
     .attr("stroke", layer.aes_params?.colour || "black")
+    .attr("opacity", d => d.alpha != null ? d.alpha : alphaDefault)
     .attr("stroke-width", strokeWidth + 2) // Make it look similar to ggplot
     .attr("stroke-linecap", "round") // make the ends round
     .attr("d", line);
