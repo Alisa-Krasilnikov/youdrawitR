@@ -2,6 +2,10 @@
 const labels = data.labels || {};
 const scales = data.scales;
 
+svg
+  .style("display", "block")
+  .style("vertical-align", "top");
+
 // Note: data already normalized. Could add it here centrally? But works for window
 // check if title
 const title = labels.title;
@@ -69,7 +73,7 @@ if (labels.x) {
   g.append("text")
     .attr("class", "x-label")
     .attr("x", innerW / 2)
-    .attr("y", innerH + 45)
+    .attr("y", innerH + 40)
     .attr("text-anchor", "middle")
     .style("font-size", "12px") // Make em smaller
     .style("font-family", "sans-serif") // Looks like ggplot
